@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    cout << 'test' << endl;
+    cout << "test" << endl;
     MainController main_controller;
 //    main_controller.start();
     return a.exec();

@@ -2,7 +2,20 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 add_compile_options(-std=c++11)
 
 project(TheOneEye)
-set(Qt5_DIR /Users/xiaozhenlong/Qt/5.15.2/wasm_32/lib/cmake/Qt5)
+
+IF (APPLE)
+    set(CMAKE_C_COMPILER "/usr/bin/clang")
+    set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+    set(Qt5_DIR /Users/xiaozhenlong/Qt/5.15.2/wasm_32/lib/cmake/Qt5)
+    if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+        set(OpenMP_C_FLAG "-fopenmp=libomp -Wno-unused-command-line-argument")
+    endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(OpenMP_CXX_FLAG "-fopenmp=libomp -Wno-unused-command-line-argument")
+    endif()
+ELSE()
+
+ENDIF()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
