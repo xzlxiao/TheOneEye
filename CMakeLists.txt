@@ -6,7 +6,7 @@ project(TheOneEye)
 IF (APPLE)
     set(CMAKE_C_COMPILER "/usr/bin/clang")
     set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
-    set(Qt5_DIR /Users/xiaozhenlong/Qt/5.15.2/wasm_32/lib/cmake/Qt5)
+    set(Qt5_DIR /Users/xiaozhenlong/Qt/6.0.0/clang_64/lib/cmake/Qt6)
     if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
         set(OpenMP_C_FLAG "-fopenmp=libomp -Wno-unused-command-line-argument")
     endif()
@@ -26,7 +26,7 @@ set(RESOURCE_DIR resource/resource.qrc)
 set(OpenCV_DIR /usr/local/cortexbot/opencv)
 find_package(OpenCV REQUIRED)
 
-find_package(Qt5 REQUIRED Widgets Network)
+find_package(Qt6 REQUIRED Widgets Network)
 
 include_directories(UserInteraction
     Test
@@ -63,7 +63,7 @@ add_executable(TheOneEye
     )
 
 target_link_libraries(TheOneEye
-    Qt5::Widgets
-    Qt5::Network
+    Qt6::Widgets
+    Qt6::Network
     ${OpenCV_LIBS}
 )
