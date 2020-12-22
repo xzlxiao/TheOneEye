@@ -26,7 +26,7 @@ set(RESOURCE_DIR resource/resource.qrc)
 set(OpenCV_DIR /usr/local/cortexbot/opencv)
 find_package(OpenCV REQUIRED)
 
-find_package(Qt6 REQUIRED Widgets Network)
+find_package(Qt5 REQUIRED Widgets Network)
 
 include_directories(UserInteraction
     Test
@@ -39,7 +39,8 @@ include_directories(UserInteraction
     )
 
 set(ControlSrc
-    Control/MainController)
+    Control/MainController
+    Control/CameraController)
 
 set(AlgorithmSrc
     Algorithm/AlgorithmTest)
@@ -48,7 +49,8 @@ set(CommonSrc
     Common/Common)
 
 set(EntitySrc
-    Entity/EntityTest)
+    Entity/EntityTest
+    Entity/CameraBase)
 
 set(TestSrc
     Test/Test)
@@ -63,7 +65,7 @@ add_executable(TheOneEye
     )
 
 target_link_libraries(TheOneEye
-    Qt6::Widgets
-    Qt6::Network
+    Qt5::Widgets
+    Qt5::Network
     ${OpenCV_LIBS}
 )
