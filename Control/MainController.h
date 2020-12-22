@@ -3,11 +3,11 @@
 
 #include <QObject>
 
-class MainController
+class MainController : public QObject
 {
 //    Q_OBJECT
 public:
-    MainController();
+    MainController(QObject *parent = nullptr);
 };
 
 #endif // MAINCONTROLLER_H

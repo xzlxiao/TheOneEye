@@ -1,6 +1,6 @@
 #include "MainController.h"
 
-MainController::MainController()
+MainController::MainController(QObject *parent) : QObject(parent)
 {
 
 }
