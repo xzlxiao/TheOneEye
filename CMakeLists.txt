@@ -35,8 +35,16 @@ include_directories(UserInteraction
     Entity
     Input
     Common
+    Views
     ${OpenCV_INCLUDE_DIRS}
     )
+
+# 设置复制到编译目录的文件
+set(COPYITEM
+    Config.ini)
+
+add_custom_command(OUTPUT  COPY_RES COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${COPYITEM} ${PROJECT_BINARY_DIR}  )
+add_custom_target(CopyTask ALL DEPENDS COPY_RES)
 
 set(ControlSrc
     Control/MainController
@@ -46,7 +54,9 @@ set(AlgorithmSrc
     Algorithm/AlgorithmTest)
 
 set(CommonSrc
-    Common/Common)
+    Common/Common
+    Common/DebugPrint
+    Common/XSetting)
 
 set(EntitySrc
     Entity/EntityTest
@@ -55,13 +65,20 @@ set(EntitySrc
 set(TestSrc
     Test/Test)
 
+set(ViewsSrc
+    Views/MainWindow
+    Views/WinBase
+    )
+
 add_executable(TheOneEye
     main.cpp
+    Config.ini
     ${ControlSrc}
     ${AlgorithmSrc}
     ${CommonSrc}
     ${EntitySrc}
     ${TestSrc}
+    ${ViewsSrc}
     )
 
 target_link_libraries(TheOneEye

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     cout << "test" << endl;
     MainController main_controller;
-//    main_controller.start();
+    main_controller.start();
     return a.exec();
 }
 

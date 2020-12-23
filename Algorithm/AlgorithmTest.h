@@ -5,7 +5,6 @@
 
 class AlgorithmTest
 {
-//    Q_OBJECT
 public:
     AlgorithmTest();
 };

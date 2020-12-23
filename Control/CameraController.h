@@ -6,11 +6,13 @@
 
 class CameraController : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit CameraController(QObject *parent = nullptr);
     ~CameraController(){}
 private:    
-    std::<*CameraBase> mCameraList;
+    std::vector<CameraBase* > mCameraList;
     int mCameraNum;
 
 public:

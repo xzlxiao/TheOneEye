@@ -5,7 +5,8 @@
 
 class EntityTest : public QObject
 {
-//    Q_OBJECT
+    Q_OBJECT
+
 public:
     explicit EntityTest(QObject *parent = nullptr);
 

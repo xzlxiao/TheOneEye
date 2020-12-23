@@ -4,12 +4,14 @@
 
 class CameraBase : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit CameraBase(QObject *parent = nullptr);
     
     int mCameraId;
-    virtual openCamera() const {throw "未实现该成员方法"; }
-    virtual releaseCamera() const {throw "未实现该成员方法"; }
+    virtual void openCamera() const {throw "未实现该成员方法"; }
+    virtual void releaseCamera() const {throw "未实现该成员方法"; }
 signals:
 
 };
