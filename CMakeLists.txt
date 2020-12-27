@@ -48,7 +48,8 @@ add_custom_target(CopyTask ALL DEPENDS COPY_RES)
 
 set(ControlSrc
     Control/MainController
-    Control/CameraController)
+    Control/CameraController
+    Control/ViewController)
 
 set(AlgorithmSrc
     Algorithm/AlgorithmTest)

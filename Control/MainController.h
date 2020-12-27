@@ -9,6 +9,8 @@
 #include <vector>
 #include "MainWindow.h"
 #include "DebugPrint.h"
+#include "CameraController.h"
+#include "ViewController.h"
 
 class MainController : public QObject
 {
@@ -26,6 +28,9 @@ public:     // 窗口
 
 private:    // 组件
     QTimer mMainLoopTimer;
+
+    CameraController mCameraController;
+    ViewController mViewController;
 
 public:     // 方法
     void start();
