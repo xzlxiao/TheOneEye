@@ -16,7 +16,7 @@ public:
     ~WinBase();
     virtual void windowLoad() = 0;
 
-protected:
+public:
     //Ui::WinBase *ui;
     QString id;     //界面的类名
     QString name;   //界面名

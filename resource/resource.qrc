@@ -4,5 +4,6 @@
     </qresource>
     <qresource prefix="/">
         <file>icons/background1.jpg</file>
+        <file>images/background001.gif</file>
     </qresource>
 </RCC>

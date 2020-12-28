@@ -19,13 +19,6 @@ class MainController : public QObject
 public:
     MainController(QObject *parent = nullptr);
 
-public:     // 窗口
-    MainWindow *mMainWin;
-    QFrame *mMainFrame;
-    QWidget *mCurrentWin;
-    QGridLayout *mCurrentLayout;
-    std::vector<QWidget * > mFrameList;
-
 private:    // 组件
     QTimer mMainLoopTimer;
 
@@ -34,7 +27,6 @@ private:    // 组件
 
 public:     // 方法
     void start();
-    void windowSwitch(QWidget *win);
     void initConnect();
 
 public slots:

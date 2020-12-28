@@ -68,6 +68,7 @@ set(TestSrc
 
 set(ViewsSrc
     Views/MainWindow
+    Views/MainWindow.ui
     Views/WinBase
     )
 
@@ -80,6 +81,7 @@ add_executable(TheOneEye
     ${EntitySrc}
     ${TestSrc}
     ${ViewsSrc}
+    ${RESOURCE_DIR}
     )
 
 target_link_libraries(TheOneEye

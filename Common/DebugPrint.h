@@ -6,9 +6,9 @@ class DebugPrint
 {
 public:
     DebugPrint();
+    static bool isPrintDebug;
 };
 
-const bool isPrintDebug = 0;
-#define MyDebug if(isPrintDebug)qDebug()<<"[FILE:"<<__FILE__<<",LINE"<<__LINE__<<",FUNC"<<__FUNCTION__<<"]"<<endl;
+#define MyDebug if(DebugPrint::isPrintDebug)qDebug()<<"[FILE:"<<__FILE__<<",LINE"<<__LINE__<<",FUNC"<<__FUNCTION__<<"]"<<endl;
 
 #endif // DEBUGPRINT_H

@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QWidget>
+#include <QLabel>
+#include <QMovie>
+#include <vector>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +21,10 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+public:
+    QWidget *mCentralWidget;
+    std::vector<QLabel *> mlbBackgroundList;
 };
 
 #endif // MAINWINDOW_H
