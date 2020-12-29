@@ -1,6 +1,6 @@
 #include "EntityTest.h"
 
-EntityTest::EntityTest(QObject *parent) : QObject(parent)
+EntityTest::EntityTest(QObject *parent) : CameraBase(parent)
 {
 
 }

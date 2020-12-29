@@ -48,7 +48,7 @@
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QLabel" name="lbBackground7">
+     <widget class="QLabel" name="lbBackground5">
       <property name="text">
        <string/>
       </property>
@@ -56,20 +56,6 @@
     </item>
     <item row="1" column="1">
      <widget class="QLabel" name="lbBackground4">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLabel" name="lbBackground9">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="lbBackground6">
       <property name="text">
        <string/>
       </property>
@@ -91,15 +77,8 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="lbBackground5">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="1">
-     <widget class="QLabel" name="lbBackground8">
+     <widget class="QLabel" name="lbBackground6">
       <property name="text">
        <string/>
       </property>

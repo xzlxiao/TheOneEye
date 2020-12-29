@@ -14,7 +14,7 @@ class WinBase : public QWidget
 public:
     explicit WinBase(QWidget *parent = 0);
     ~WinBase();
-    virtual void windowLoad() = 0;
+    virtual void windowLoad(){}
 
 public:
     //Ui::WinBase *ui;

@@ -14,6 +14,7 @@ public:
     explicit XSetting(QObject *parent = nullptr);
     static QString mName;
     static bool *isDebug;
+    static bool isShowBorder;
 public:
     static void print();
     static void setValue(const QString &key, const QString &value);

@@ -2,6 +2,7 @@
 #include "DebugPrint.h"
 QString XSetting::mName = "None";
 bool *XSetting::isDebug = &DebugPrint::isPrintDebug;
+bool XSetting::isShowBorder = false;
 
 XSetting::XSetting(QObject *parent) : QObject(parent)
 {
@@ -48,5 +49,5 @@ void XSetting::loadSettingFile()
     QSettings my_setting(ConfigFileDir, QSettings::IniFormat);
     mName = my_setting.value("Test/Name", "Fail").toString();
     DebugPrint::isPrintDebug = my_setting.value("Debug/isDebug", false).toBool();
-
+    isShowBorder = my_setting.value("Debug/isShowBorder", false).toBool();
 }

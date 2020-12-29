@@ -61,7 +61,8 @@ set(CommonSrc
 
 set(EntitySrc
     Entity/EntityTest
-    Entity/CameraBase)
+    Entity/CameraBase
+    Entity/CameraInterface)
 
 set(TestSrc
     Test/Test)
@@ -70,6 +71,8 @@ set(ViewsSrc
     Views/MainWindow
     Views/MainWindow.ui
     Views/WinBase
+    Views/TestCameraWin
+    Views/TestCameraWin.ui
     )
 
 add_executable(TheOneEye

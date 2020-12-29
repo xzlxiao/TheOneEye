@@ -14,6 +14,8 @@ void MainController::start()
     MyDebug;
     mViewController.start();
     mMainLoopTimer.start(50);
+
+    mViewController.navigateTo("TestCameraWin");
 }
 
 

@@ -12,6 +12,7 @@ public:
     int mCameraId;
     virtual void openCamera() const {throw "未实现该成员方法"; }
     virtual void releaseCamera() const {throw "未实现该成员方法"; }
+    void setCameraID(int id);
 signals:
 
 };

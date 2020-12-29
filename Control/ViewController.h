@@ -21,8 +21,14 @@ public:     // 窗口
     std::vector<WinBase * > mFrameList;
 
 public:     // 方法
+    void windowLoad();
+    void eventFilterInstall();
     void start();
+    void navigateTo(QString win_name);
     void windowSwitch(QWidget *win);
+
+public:     // 事件
+    bool eventFilter(QObject *watched, QEvent *event);
 
 public slots:
     void changeWinSlot(uint num);

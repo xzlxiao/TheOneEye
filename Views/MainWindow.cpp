@@ -14,13 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mlbBackgroundList.push_back(ui->lbBackground4);
     mlbBackgroundList.push_back(ui->lbBackground5);
     mlbBackgroundList.push_back(ui->lbBackground6);
-    mlbBackgroundList.push_back(ui->lbBackground7);
-    mlbBackgroundList.push_back(ui->lbBackground8);
-    mlbBackgroundList.push_back(ui->lbBackground9);
-//    QMovie *movie = new QMovie(":/images/background001.gif");
-//    ui->lbBackground->setMovie(movie);
-//    movie->start();
-
 }
 
 MainWindow::~MainWindow()
