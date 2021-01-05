@@ -3,6 +3,7 @@
 
 #include "WinBase.h"
 #include <QLabel>
+#include "XLabel.h"
 
 namespace Ui {
 class TestCameraWin;
@@ -20,7 +21,7 @@ private:
     Ui::TestCameraWin *ui;
 
 public:
-    QLabel *mCameraShow;
+    XLabel *mCameraShow;
 };
 
 #endif // TESTCAMERAWIN_H

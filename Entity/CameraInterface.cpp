@@ -1,26 +1,28 @@
 #include "CameraInterface.h"
+#include "XSetting.h"
+
 using namespace cv;
 using namespace std;
-bool CameraInterface::isCameraNotUsed = false;
 
 CameraInterface::CameraInterface(QObject *parent) : CameraBase(parent),
     video_capture(nullptr),
     timer_video(nullptr),
-    timer_img_grab(nullptr)
+    timer_img_grab(nullptr),
+    isCameraNotUsed(false)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     this->_init();
 }
 
 CameraInterface::~CameraInterface()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     this->releaseCamera();
 }
 
 void CameraInterface::_init()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     this->mCameraId = 0;
     this->rate = 30;
     this->timer_video = new QTimer(this);
@@ -32,7 +34,7 @@ void CameraInterface::_init()
 
 void CameraInterface::openCamera()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     try
     {
         if (this->video_capture == nullptr)
@@ -61,7 +63,7 @@ void CameraInterface::openCamera()
     else
     {
         *(this->video_capture) >> this->frame;
-        //CameraInterface::Mat2QImage(this->frame, this->image);
+        CameraInterface::Mat2QImage(this->frame, this->image);
 
     }
     cout << "Loaded camera " << this->mCameraId << "." << endl;
@@ -79,7 +81,7 @@ void CameraInterface::openCamera()
 /// \abstract 当width_resize和height_resize都大于0时，image为缩放的图片
 void CameraInterface::readFrame(const int &width_resize = -1, const int &height_resize = -1)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     *(this->video_capture) >> this->frame;
     //flip(frame, frame, 1);
     if (!this->frame.empty())
@@ -102,14 +104,17 @@ void CameraInterface::readFrame(const int &width_resize = -1, const int &height_
 
 void CameraInterface::readFrameOnly()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
+    mMutex.lock();
     *(this->video_capture) >> this->frame;
+    // this->frame.copyTo(frame_copy);
+    mMutex.unlock();
     //flip(frame, frame, 1);
 }
 
 void CameraInterface::releaseCamera()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     timer_img_grab->stop();
     timer_video->stop();
 
@@ -118,7 +123,7 @@ void CameraInterface::releaseCamera()
 
 void CameraInterface::takePictures(const string &dir)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     //this->readFrame();
     if (!this->frame.empty())
     {
@@ -128,7 +133,7 @@ void CameraInterface::takePictures(const string &dir)
 
 void CameraInterface::takeVideo(const string &dir)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     if (this->video_capture->isOpened())
     {
         //this->video_writer.open(dir, cv::VideoWriter::fourcc('P', 'I', 'M', '1'), this->rate, cv::Size(this->frame.cols, frame.rows), true);
@@ -142,21 +147,21 @@ void CameraInterface::takeVideo(const string &dir)
 
 void CameraInterface::endTakeVideo()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     this->timer_video->stop();
     this->video_writer.release();
 }
 
 void CameraInterface::resizeImage(cv::Mat &image_, const int &width_crop, const int &height_crop)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     image_ = this->frame(getShowRect(this->frame, width_crop,height_crop));
     cv::resize(image_,image_, Size(width_crop, height_crop));
 }
 
 Rect CameraInterface::getShowRect(const Mat &src_image, const int &width_crop, const int &height_crop)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     double gui_wh_ratio, img_wh_ratio;
     Rect ret;
     gui_wh_ratio = (double)width_crop / (double)height_crop;
@@ -181,7 +186,7 @@ Rect CameraInterface::getShowRect(const Mat &src_image, const int &width_crop, c
 
 void CameraInterface::Mat2QImage(const Mat &cvImg, QImage &qImage_out)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     Mat invert_img;
     if(cvImg.channels()==3)                             //3 channels color image
     {
@@ -211,14 +216,15 @@ void CameraInterface::Mat2QImage(const Mat &cvImg, QImage &qImage_out)
 
 void CameraInterface::setDisplaySize(const int &display_width_, const int &display_height_)
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     this->display_width = display_width_;
     this->display_height = display_height_;
 }
 
 void CameraInterface::slotOpenCamera()
 {
-    while(!CameraInterface::isCameraNotUsed)
+    if (XSetting::isCameraDebug) MyDebug;
+    while(!isCameraNotUsed)
     {
         try
         {
@@ -246,7 +252,7 @@ void CameraInterface::slotOpenCamera()
     }
 
 
-    if (!CameraInterface::isCameraNotUsed)
+    if (!isCameraNotUsed)
     {
         if (!this->video_capture->isOpened())
         {
@@ -256,7 +262,7 @@ void CameraInterface::slotOpenCamera()
         else
         {
             *(this->video_capture) >> this->frame;
-            //CameraInterface::Mat2QImage(this->frame, this->image);
+//            CameraInterface::Mat2QImage(this->frame, this->image);
             emit gotCvFrameSignal(this->frame);
         }
         cout << "Loaded camera " << this->mCameraId << "." << endl;
@@ -266,19 +272,26 @@ void CameraInterface::slotOpenCamera()
     }
 }
 
+void CameraInterface::slotCloseCamera()
+{
+    if (XSetting::isCameraDebug) MyDebug;
+    isCameraNotUsed = true;
+    releaseCamera();
+}
+
 void CameraInterface::takeVideoSlot()
 {
-    //MyDebug;
+    if (XSetting::isCameraDebug) MyDebug;
     this->video_writer.write(this->frame);
 }
 
 void CameraInterface::timerImgGrab()
 {
-    //MyDebug;
-    if (!CameraInterface::isCameraNotUsed)
+    if (XSetting::isCameraDebug) MyDebug;
+    if (!isCameraNotUsed)
     {
         this->readFrameOnly();
-        emit gotCvFrameSignal(frame);
+        emit gotCvFrameSignal(this->frame);
     }
     else
     {

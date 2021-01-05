@@ -8,6 +8,7 @@
 #include <QTimer>
 #include "DebugPrint.h"
 #include "CameraBase.h"
+#include <QMutex>
 
 class CameraInterface : public CameraBase
 {
@@ -22,7 +23,7 @@ private:
     cv::VideoCapture *video_capture;
     QTimer *timer_video;
     QTimer *timer_img_grab;
-
+    QMutex mMutex;
     cv::VideoWriter video_writer;   //make a video record
 
     int display_width=450;
@@ -37,7 +38,7 @@ public:
     cv::Mat frame;          // 原始读取的图片
     QImage image;           // 缩放的图片
     void openCamera();      // 打开摄像头
-    static bool isCameraNotUsed;    // use it when close the thread
+    bool isCameraNotUsed;    // use it when close the thread
     void releaseCamera();     // 关闭摄像头
     void takePictures(const std::string &dir);    // 拍照
     void takeVideo(const std::string &dir);       // 录像
@@ -51,9 +52,9 @@ public:
 
 signals:
     void gotCvFrameSignal(const cv::Mat &cv_frame);
-    void gotQImageSignal(const QImage &qt_image);
 public slots:
     void slotOpenCamera();
+    void slotCloseCamera();
 private slots:
     void takeVideoSlot();
     void timerImgGrab();

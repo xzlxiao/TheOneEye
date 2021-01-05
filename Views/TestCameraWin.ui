@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QLabel" name="lbCameraShow">
+    <widget class="XLabel" name="lbCameraShow">
      <property name="styleSheet">
       <string notr="true">background-color: rgb(114, 159, 207);</string>
      </property>
@@ -26,6 +26,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XLabel</class>
+   <extends>QLabel</extends>
+   <header>XLabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

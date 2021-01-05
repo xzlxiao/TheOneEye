@@ -15,6 +15,7 @@ public:
     static QString mName;
     static bool *isDebug;
     static bool isShowBorder;
+    static bool isCameraDebug;
 public:
     static void print();
     static void setValue(const QString &key, const QString &value);

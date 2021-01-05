@@ -73,6 +73,7 @@ set(ViewsSrc
     Views/WinBase
     Views/TestCameraWin
     Views/TestCameraWin.ui
+    Views/XLabel
     )
 
 add_executable(TheOneEye

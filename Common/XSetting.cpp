@@ -3,6 +3,7 @@
 QString XSetting::mName = "None";
 bool *XSetting::isDebug = &DebugPrint::isPrintDebug;
 bool XSetting::isShowBorder = false;
+bool XSetting::isCameraDebug = false;
 
 XSetting::XSetting(QObject *parent) : QObject(parent)
 {
@@ -50,4 +51,5 @@ void XSetting::loadSettingFile()
     mName = my_setting.value("Test/Name", "Fail").toString();
     DebugPrint::isPrintDebug = my_setting.value("Debug/isDebug", false).toBool();
     isShowBorder = my_setting.value("Debug/isShowBorder", false).toBool();
+    isCameraDebug = my_setting.value("Debug/isCameraDebug", false).toBool();
 }

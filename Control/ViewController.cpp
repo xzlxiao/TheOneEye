@@ -4,6 +4,10 @@
 #include "XSetting.h"
 #include <QMovie>
 #include <QResizeEvent>
+#include "Common.h"
+#include <opencv2/opencv.hpp>
+using namespace cv;
+using namespace std;
 
 ViewController::ViewController(QObject *parent) : QObject(parent),
     mMainWin(new MainWindow),
@@ -24,6 +28,7 @@ void ViewController::windowLoad()
     mMainFrame->show();
     eventFilterInstall();
     TestCameraWin *test_camera_win = new TestCameraWin(mMainFrame);
+    mTestMovieShow = test_camera_win->mCameraShow;
     mFrameList.push_back(test_camera_win);
 }
 
@@ -136,5 +141,51 @@ void ViewController::changeWinSlot(QString win_name)
     if (!isFind)
     {
         throw "Fail to switch window. The name of win isn't exited, please checking.";
+    }
+}
+
+cv::Rect ViewController::getShowRect(const cv::Mat &src_image, const int &width_crop, const int &height_crop)
+{
+    double gui_wh_ratio, img_wh_ratio;
+    cv::Rect ret;
+    gui_wh_ratio = (double)width_crop / (double)height_crop;
+    img_wh_ratio = (double)src_image.size().width / (double)src_image.size().height;
+    if (gui_wh_ratio > img_wh_ratio)
+    {
+        ret.width = src_image.size().width;
+        ret.height = (double)(((double)ret.width / (double)width_crop) * (double)height_crop);
+        ret.x = 0;
+        ret.y = (int)floor(((double)src_image.size().height - (double)ret.height) / 2.0);
+    }
+    else
+    {
+        ret.height = src_image.size().height;
+        ret.width = (int)(((double)ret.height / (double)height_crop) * (double)width_crop);
+
+        ret.x = (int)floor(((double)src_image.size().width - (double)ret.width) / 2.0);
+        ret.y = 0;
+    }
+    return ret;
+}
+
+void ViewController::resizeImage(cv::Mat &image_, const int &width_crop, const int &height_crop)
+{
+    image_ = image_(getShowRect(image_, width_crop,height_crop));
+    cv::resize(image_,image_, cv::Size(width_crop, height_crop));
+}
+
+void ViewController::displayImageInQLabel(const cv::Mat &image, XLabel *label)
+{
+    cv::Mat image_tmp;
+    QImage q_rgb;
+    if (!image.empty())
+    {
+        image.copyTo(image_tmp);
+        resizeImage(image_tmp, label->width(), label->height());
+        Common::Mat2QImage(image_tmp, label->mImage);
+    }
+    else
+    {
+        //const_cast<QLabel &>(label).clear();
     }
 }

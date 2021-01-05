@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class EntityTest : public CameraBase
+class EntityTest : public QObject
 {
     Q_OBJECT
 
