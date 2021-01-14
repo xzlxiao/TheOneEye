@@ -1,0 +1,132 @@
+from PyQt5.QtWidgets import QMainWindow, QFrame, QWidget, QGridLayout
+import numpy as np
+import cv2
+from PyQt5 import QtCore, QtWidgets, QtGui, uic
+from PyQt5.QtGui import QMovie, QResizeEvent
+from PyQt5.QtCore import pyqtSignal, QObject, QEvent
+from PyQt5.uic import loadUi
+from Views import WinBase, XLabel
+import math
+from Common.DebugPrint import myDebug, get_current_function_name
+from Common.XSetting import XSetting
+from Common.Common import XRect
+from Views.MainWindow import MainWindow
+from Views.XLabel import XLabel
+from Views import TestCameraWin
+import sys
+sys.path.append("../")
+
+class ViewController(QObject):
+    def __init__(self, *args):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        super(ViewController, self).__init__(*args)
+        self.mMainWin = MainWindow()
+        self.mMainFrame = QFrame(self.mMainWin)
+        self.mCurrentWin = None
+        self.mCurrentLayout = None
+        self.mFrameList = []
+
+        self.mTestMovieShow = None
+        self.windowLoad()
+
+# 方法
+    def windowLoad(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.mMainFrame.setGeometry(0, 0, self.mMainWin.mCentralWidget.height(),
+                                    self.mMainWin.mCentralWidget.width())
+        if XSetting.isShowBorder:
+            self.mMainFrame.setStyleSheet("border:2px solid rgba(255, 0, 0, 1);")
+        self.mMainFrame.show()
+        self.eventFilterInstall()
+        test_camera_win = TestCameraWin.TestCameraWin(self.mMainFrame)
+        test_camera_win.hide()
+        self.mTestMovieShow = test_camera_win.mCameraShow
+        self.mFrameList.append(test_camera_win)
+
+    def eventFilterInstall(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.mMainWin.installEventFilter(self)
+
+    def start(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.mMainWin.show()
+        movie = QMovie("resource/images/background001.gif")
+        for label_i in self.mMainWin.mlbBackgroundList:
+            label_i.setMovie(movie)
+            label_i.setScaledContents(True)
+        movie.start()
+
+    def navigateTo(self, win_name: str):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        isFind = False
+        for iter in self.mFrameList:
+            if win_name.strip() == iter.name:
+                self.windowSwitch(iter)
+                isFind = True
+
+        if not isFind:
+            raise Exception("Fail to switch window. The name of win isn't exited, please checking.")
+
+    def windowSwitch(self, win: QWidget):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.mCurrentWin: QFrame
+        if self.mCurrentWin is not None:
+            self.mCurrentLayout.replaceWidget(self.mCurrentWin, win)
+            self.mCurrentWin.hide()
+        self.mCurrentWin = win
+        self.mCurrentWin.show()
+
+    def getShowRect(self, src_image: np.ndarray, width_crop: int, height_crop: int) -> XRect:
+        myDebug(self.__class__.__name__, get_current_function_name())
+        ret = XRect()
+        gui_wh_ratio = float(width_crop) / float(height_crop)
+        img_wh_ratio = float(src_image.size().width) / float(src_image.size().height)
+        if gui_wh_ratio > img_wh_ratio:
+            ret.width = src_image.shape[1]
+            ret.height = src_image.shape[0]
+            ret.x = 0
+            ret.y = int(math.floor(float(src_image.shape[0] - ret.height)/2.0))
+        else:
+            ret.height = src_image.shape[0]
+            ret.width = int(float(ret.height) / float(height_crop) * float(width_crop))
+
+            ret.x = int(math.floor((float(src_image.shape[1]) - float(ret.width))/2.0))
+            ret.y = 0
+        return ret
+
+    def resizeImage(self, image_: np.ndarray, width_crop: int, height_crop: int) -> np.ndarray:
+        myDebug(self.__class__.__name__, get_current_function_name())
+        show_rect = self.getShowRect(image_, width_crop, height_crop)
+        image_ = image_[show_rect.y:show_rect.height, show_rect.x:show_rect.width]
+        return cv2.resize(image_, (width_crop, height_crop))
+
+# 事件
+    def eventFilter(self, watched: 'QObject', event: 'QEvent') -> bool:
+        myDebug(self.__class__.__name__, get_current_function_name())
+        isEventGot = False
+        if watched is self.mMainWin:
+            if event.type() == QResizeEvent.Resize:
+                self.mMainFrame.resize(self.mMainWin.mCentralWidget.width(), self.mMainWin.mCentralWidget.height())
+                if self.mCurrentWin is not None:
+                    self.mCurrentWin.resize(self.mMainWin.mCentralWidget.width(), self.mMainWin.mCentralWidget.height())
+                isEventGot = True
+
+        return isEventGot
+
+# slots
+    def changeWinSlot(self, num: int):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        if num < len(self.mFrameList):
+            self.windowSwitch(self.mFrameList[num])
+        else:
+            raise Exception("Fail to switch window. The No. of win isn't exited, please checking.")
+
+    def changeWinSlot(self, win_name: str):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        isFind = False
+        for iter in self.mFrameList:
+            if win_name.strip() == iter.name:
+                self.windowSwitch(iter)
+                isFind = True
+        if isFind:
+            raise Exception("Fail to switch window. The name of win isn't exited, please checking.")
