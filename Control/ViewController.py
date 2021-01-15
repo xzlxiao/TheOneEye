@@ -13,6 +13,7 @@ from Common.Common import XRect
 from Views.MainWindow import MainWindow
 from Views.XLabel import XLabel
 from Views import TestCameraWin
+from Entity.CameraInterface import CameraInterface
 import sys
 sys.path.append("../")
 
@@ -26,6 +27,7 @@ class ViewController(QObject):
         self.mCurrentLayout = None
         self.mFrameList = []
 
+        self.mTestCamera = CameraInterface()
         self.mTestMovieShow = None
         self.windowLoad()
 
@@ -38,10 +40,18 @@ class ViewController(QObject):
             self.mMainFrame.setStyleSheet("border:2px solid rgba(255, 0, 0, 1);")
         self.mMainFrame.show()
         self.eventFilterInstall()
+
+        ### 摄像头测试 begin
         test_camera_win = TestCameraWin.TestCameraWin(self.mMainFrame)
         test_camera_win.hide()
+        test_camera_win.mCameraShow.hide()
+        test_camera_win.mainlayout1.replaceWidget(test_camera_win.mCameraShow, self.mTestCamera.mViewCamera)
+        test_camera_win.mCameraShow = self.mTestCamera.mViewCamera
+        self.mTestCamera.openCamera()
+        self.mTestCamera.mViewCamera.show()
         self.mTestMovieShow = test_camera_win.mCameraShow
         self.mFrameList.append(test_camera_win)
+        ### 摄像头测试 end
 
     def eventFilterInstall(self):
         myDebug(self.__class__.__name__, get_current_function_name())

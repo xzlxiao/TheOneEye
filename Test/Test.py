@@ -1,4 +1,4 @@
-# import cv2
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from Common import Common, XSetting
@@ -8,14 +8,14 @@ import sys
 sys.path.append('../')
 import os
 
-# def testCamera():
-#     cap = cv2.VideoCapture(1)
-#
-#     plt.figure("camera")
-#     while True:
-#         ret, frame = cap.read()
-#         plt.imshow(frame)
-#         plt.show()
+def testCamera():
+    cap = cv2.VideoCapture(1)
+
+    plt.figure("camera")
+    while True:
+        ret, frame = cap.read()
+        plt.imshow(frame)
+        plt.show()
 
 
 def testSettings():

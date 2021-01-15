@@ -2,9 +2,10 @@ from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
 from PyQt5.QtCore import pyqtSignal, QObject, QEvent
+from PyQt5.QtWidgets import QWidget
 
 
-class CameraBase(QObject):
+class CameraBase(QWidget):
     def __init__(self, *args):
         super(CameraBase, self).__init__(*args)
         self.mCameraId = -1

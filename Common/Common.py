@@ -1,6 +1,7 @@
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 import numpy as np
+from PyQt5.QtGui import QImage
 sys.path.append("../")
 
 class Common:
@@ -15,6 +16,12 @@ class Common:
     def getSimilarity(A: np.ndarray, B: np.ndarray) -> bool:
         pass
 
+    @staticmethod
+    def qImage2Numpy(qimg: QImage) -> np.ndarray:
+        ptr = qimg.constBits()
+        ptr.setsize(qimg.byteCount())
+        mat = np.array(ptr).reshape(qimg.height(), qimg.width(), 4)  # 注意这地方通道数一定要填4，否则出错
+        return mat
 
 class XRect:
     def __init__(self, x=0, y=0, width=0, height=0):

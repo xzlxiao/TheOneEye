@@ -53,7 +53,5 @@ class XSetting(QObject):
         my_setting = QSettings(ConfigFileDir, QSettings.IniFormat)
         XSetting.mName = my_setting.value("Test/Name", "Fail", type=str)
         DebugPrint.isPrintDebug = my_setting.value("Debug/isDebug", False, type=bool)
-        print(DebugPrint.isPrintDebug)
-        print(XSetting.isDebug.isPrintDebug)
         XSetting.isShowBorder = my_setting.value("Debug/isShowBorder", False, type=bool)
         XSetting.isCameraDebug = my_setting.value("Debug/isCameraDebug", False, type=bool)
