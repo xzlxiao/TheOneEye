@@ -19,13 +19,13 @@ class MainController(QtCore.QObject):
         self.mViewController.start()
         self.mMainLoopTimer.start(50)
 
-        self.mViewController.navigateTo("TestCameraWin")
+        self.mViewController.navigateTo("ContentsNavWin")
 
     def initConnect(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mMainLoopTimer.timeout.connect(self.mainLoop)
 
     def mainLoop(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
+        # myDebug(self.__class__.__name__, get_current_function_name())
         pass
     

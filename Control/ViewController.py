@@ -12,7 +12,7 @@ from Common.XSetting import XSetting
 from Common.Common import XRect
 from Views.MainWindow import MainWindow
 from Views.XLabel import XLabel
-from Views import TestCameraWin
+from Views import TestCameraWin, ContentsNavWin
 from Entity.CameraInterface import CameraInterface
 import sys
 sys.path.append("../")
@@ -24,7 +24,7 @@ class ViewController(QObject):
         self.mMainWin = MainWindow()
         self.mMainFrame = QFrame(self.mMainWin)
         self.mCurrentWin = None
-        self.mCurrentLayout = None
+        self.mMainLayout = QGridLayout(self.mMainFrame)
         self.mFrameList = []
 
         self.mTestCamera = CameraInterface()
@@ -41,6 +41,8 @@ class ViewController(QObject):
         self.mMainFrame.show()
         self.eventFilterInstall()
 
+        self.windowsInstall(ContentsNavWin.ContentsNavWin)
+
         ### 摄像头测试 begin
         test_camera_win = TestCameraWin.TestCameraWin(self.mMainFrame)
         test_camera_win.hide()
@@ -52,6 +54,19 @@ class ViewController(QObject):
         self.mTestMovieShow = test_camera_win.mCameraShow
         self.mFrameList.append(test_camera_win)
         ### 摄像头测试 end
+
+    def windowsInstall(self, win_type):
+        '''
+        子窗口装载器
+        :param win_type: 窗口类型
+        :return:
+        '''
+        myDebug(self.__class__.__name__, get_current_function_name())
+        win = win_type(self.mMainFrame)
+        win.signalChangeWin.connect(self.slotChangeWin)
+        win.signalReturn.connect(self.slotReturnWin)
+        win.hide()
+        self.mFrameList.append(win)
 
     def eventFilterInstall(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -81,8 +96,10 @@ class ViewController(QObject):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mCurrentWin: QFrame
         if self.mCurrentWin is not None:
-            self.mCurrentLayout.replaceWidget(self.mCurrentWin, win)
+            self.mMainLayout.replaceWidget(self.mCurrentWin, win)
             self.mCurrentWin.hide()
+        else:
+            self.mMainLayout.addWidget(win)
         self.mCurrentWin = win
         self.mCurrentWin.show()
 
@@ -112,7 +129,7 @@ class ViewController(QObject):
 
 # 事件
     def eventFilter(self, watched: 'QObject', event: 'QEvent') -> bool:
-        myDebug(self.__class__.__name__, get_current_function_name())
+        # myDebug(self.__class__.__name__, get_current_function_name())
         isEventGot = False
         if watched is self.mMainWin:
             if event.type() == QResizeEvent.Resize:
@@ -123,20 +140,26 @@ class ViewController(QObject):
 
         return isEventGot
 
-# slots
-    def changeWinSlot(self, num: int):
+    def slotChangeWin(self, win):
         myDebug(self.__class__.__name__, get_current_function_name())
-        if num < len(self.mFrameList):
-            self.windowSwitch(self.mFrameList[num])
+        if isinstance(win, int):
+            num = win
+            if num < len(self.mFrameList):
+                self.windowSwitch(self.mFrameList[num])
+            else:
+                raise Exception("Fail to switch window. The No. of win isn't exited, please checking.")
+        elif isinstance(win, str):
+            win_name = win
+            isFind = False
+            for iter in self.mFrameList:
+                if win_name.strip() == iter.name:
+                    self.windowSwitch(iter)
+                    isFind = True
+            if not isFind:
+                raise Exception("Fail to switch window. The name of win isn't exited, please checking.")
         else:
-            raise Exception("Fail to switch window. The No. of win isn't exited, please checking.")
+            raise TypeError()
 
-    def changeWinSlot(self, win_name: str):
+    def slotReturnWin(self):
         myDebug(self.__class__.__name__, get_current_function_name())
-        isFind = False
-        for iter in self.mFrameList:
-            if win_name.strip() == iter.name:
-                self.windowSwitch(iter)
-                isFind = True
-        if isFind:
-            raise Exception("Fail to switch window. The name of win isn't exited, please checking.")
+        self.windowSwitch(self.mFrameList[0])

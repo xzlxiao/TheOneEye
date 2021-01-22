@@ -6,14 +6,13 @@ import sys
 sys.path.append("../")
 
 class WinBase(QtWidgets.QWidget):
+    signalReturn = pyqtSignal()
+    signalChangeWin = pyqtSignal(str)
     def __init__(self, *args):
-        print("%s.%s invoked" % (self.__class__.__name__, get_current_function_name()))
         super(WinBase, self).__init__(*args)
         self.id: str
         self.name: str
-        self.signalReturn = pyqtSignal()
 
     def windowLoad(self):
-        print("%s.%s invoked" % (self.__class__.__name__, get_current_function_name()))
         pass
 
