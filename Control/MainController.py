@@ -1,3 +1,26 @@
+"""
+       .==.        .==.
+      //`^\\      //^`\\
+     // ^ ^\(\__/)/^ ^^\\
+    //^ ^^ ^/+  0\ ^^ ^ \\
+   //^ ^^ ^/( >< )\^ ^ ^ \\
+  // ^^ ^/\| v''v |/\^ ^ ^\\
+ // ^^/\/ /  `~~`  \ \/\^ ^\\
+ ----------------------------
+BE CAREFULL! THERE IS A DRAGON.
+
+Function：The controller of the app
+
+Modules：
+pass
+
+(c) 肖镇龙(xzl) 2021
+
+Dependencies：
+
+Updating Records:
+2021-01-22 09:38:15 xzl
+"""
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from Views import MainWindow

@@ -9,7 +9,7 @@
  ----------------------------
 BE CAREFULL! THERE IS A DRAGON.
 
-Function：ContentsNavWin
+Function：MachineVisionWin
 
 Modules：
 pass
@@ -31,29 +31,27 @@ from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
 
-
-class ContentsNavWin(WinBase.WinBase):
+class MachineVisionWin(WinBase.WinBase):
     def __init__(self, *arg):
         myDebug(self.__class__.__name__, get_current_function_name())
-        super(ContentsNavWin, self).__init__(*arg)
-        loadUi('Views/ContentsNavWin.ui', self)
+        super(MachineVisionWin, self).__init__(*arg)
+        loadUi('Views/MachineVisionWin.ui', self)
 
-        self.id = 'ContentsNavWin'
-        self.name = 'ContentsNavWin'
+        self.id = 'MachineVisionWin'
+        self.name = 'MachineVisionWin'
 
-
+        self.mReturnButton.setParent(self)
+        self.mReturnButton.show()
         self.mkConnect()
 
     def mkConnect(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        self.btnToTestForm: QPushButton
-        self.btnToTestForm.clicked.connect(self.on_btnToTestForm)
-        self.btnToMVForm.clicked.connect(self.on_btnToMVForm)
+        pass
 
-    def on_btnToTestForm(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        self.signalChangeWin.emit('TestCameraWin')
+    def showEvent(self, event):
+        self.setReturnButtonLoc()
 
-    def on_btnToMVForm(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        self.signalChangeWin.emit('MachineVisionWin')
+    def hideEvet(self, event):
+        pass
+
+    # def setReturnButtonLoc(self):
+    #     self.mReturnButton.move(self.width() / 10, self.height() * 8 / 10)

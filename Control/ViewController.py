@@ -1,3 +1,26 @@
+"""
+       .==.        .==.
+      //`^\\      //^`\\
+     // ^ ^\(\__/)/^ ^^\\
+    //^ ^^ ^/+  0\ ^^ ^ \\
+   //^ ^^ ^/( >< )\^ ^ ^ \\
+  // ^^ ^/\| v''v |/\^ ^ ^\\
+ // ^^/\/ /  `~~`  \ \/\^ ^\\
+ ----------------------------
+BE CAREFULL! THERE IS A DRAGON.
+
+Function：Read configure files
+
+Modules：
+pass
+
+(c) 肖镇龙(xzl) 2021
+
+Dependencies：
+
+Updating Records:
+2021-01-22 09:38:15 xzl
+"""
 from PyQt5.QtWidgets import QMainWindow, QFrame, QWidget, QGridLayout
 import numpy as np
 import cv2
@@ -12,7 +35,7 @@ from Common.XSetting import XSetting
 from Common.Common import XRect
 from Views.MainWindow import MainWindow
 from Views.XLabel import XLabel
-from Views import TestCameraWin, ContentsNavWin
+from Views import TestCameraWin, ContentsNavWin, MachineVisionWin
 from Entity.CameraInterface import CameraInterface
 import sys
 sys.path.append("../")
@@ -42,17 +65,11 @@ class ViewController(QObject):
         self.eventFilterInstall()
 
         self.windowsInstall(ContentsNavWin.ContentsNavWin)
+        self.windowsInstall(MachineVisionWin.MachineVisionWin)
 
         ### 摄像头测试 begin
-        test_camera_win = TestCameraWin.TestCameraWin(self.mMainFrame)
-        test_camera_win.hide()
-        test_camera_win.mCameraShow.hide()
-        test_camera_win.mainlayout1.replaceWidget(test_camera_win.mCameraShow, self.mTestCamera.mViewCamera)
-        test_camera_win.mCameraShow = self.mTestCamera.mViewCamera
-        self.mTestCamera.openCamera()
-        self.mTestCamera.mViewCamera.show()
-        self.mTestMovieShow = test_camera_win.mCameraShow
-        self.mFrameList.append(test_camera_win)
+        test_camera_win = self.windowsInstall(TestCameraWin.TestCameraWin)
+        test_camera_win.setCamera(self.mTestCamera)
         ### 摄像头测试 end
 
     def windowsInstall(self, win_type):
@@ -67,6 +84,7 @@ class ViewController(QObject):
         win.signalReturn.connect(self.slotReturnWin)
         win.hide()
         self.mFrameList.append(win)
+        return win
 
     def eventFilterInstall(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -135,7 +153,7 @@ class ViewController(QObject):
             if event.type() == QResizeEvent.Resize:
                 self.mMainFrame.resize(self.mMainWin.mCentralWidget.width(), self.mMainWin.mCentralWidget.height())
                 if self.mCurrentWin is not None:
-                    self.mCurrentWin.resize(self.mMainWin.mCentralWidget.width(), self.mMainWin.mCentralWidget.height())
+                    self.mCurrentWin.setReturnButtonLoc()
                 isEventGot = True
 
         return isEventGot

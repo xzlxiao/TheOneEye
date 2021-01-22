@@ -1,12 +1,30 @@
+"""
+       .==.        .==.
+      //`^\\      //^`\\
+     // ^ ^\(\__/)/^ ^^\\
+    //^ ^^ ^/+  0\ ^^ ^ \\
+   //^ ^^ ^/( >< )\^ ^ ^ \\
+  // ^^ ^/\| v''v |/\^ ^ ^\\
+ // ^^/\/ /  `~~`  \ \/\^ ^\\
+ ----------------------------
+BE CAREFULL! THERE IS A DRAGON.
+
+Function：Read configure files
+
+Modules：
+pass
+
+(c) 肖镇龙(xzl) 2021
+
+Dependencies：
+
+Updating Records:
+2021-01-22 09:38:15 xzl
+"""
 from Common.DebugPrint import myDebug, get_current_function_name, DebugPrint
 import sys
+from PyQt5.QtCore import QObject, QSettings
 sys.path.append("../")
-import os
-
-from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtCore import pyqtSignal, QObject, QEvent, QCoreApplication, QSettings
-from PyQt5.uic import loadUi
-from Views import WinBase, XLabel
 
 
 class XSetting(QObject):
