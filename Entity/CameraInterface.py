@@ -33,7 +33,7 @@ class CameraInterface(CameraBase.CameraBase):
         # 设置图像捕获
         self.mCapture = QCameraImageCapture(self.mCamera)
         self.mCapture.setCaptureDestination(QCameraImageCapture.CaptureToBuffer)  # CaptureToBuffer
-        self.mCapture.error.connect(lambda i, e, s: self.alert(s))
+        # self.mCapture.error.connect(lambda i, e, s: self.alert(s))
         self.mCapture.imageAvailable.connect(self.readFrame)
 
         self.mTimerImageGrab = QTimer(self)
