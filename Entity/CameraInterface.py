@@ -34,10 +34,13 @@ from Common.Common import Common
 
 
 class CameraInterface(CameraBase.CameraBase):
-    def __init__(self, *args):
+    def __init__(self, *args, camera_info=None):
         super(CameraInterface, self).__init__(*args)
         # 定义相机实例对象并设置捕获模式
-        self.mCamera = QCamera()
+        if camera_info:
+            self.mCamera = QCamera(camera_info)
+        else:
+            self.mCamera = QCamera()
         self.mFrame = None
         self.mCamera.setCaptureMode(QCamera.CaptureViewfinder)
         self.mCameraOpened = False  # 设置相机打开状态为未打开

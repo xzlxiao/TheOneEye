@@ -1,19 +1,22 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from Common import Common, XSetting
+import os
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import pyqtSignal, QObject, QEvent, QCoreApplication, QSettings
 import sys
 sys.path.append('../')
-import os
+sys.path.append('./')
+from Common import Common, XSetting
+
 
 def testCamera():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     plt.figure("camera")
     while True:
         ret, frame = cap.read()
+        print(ret, frame)
         plt.imshow(frame)
         plt.show()
 
@@ -31,3 +34,5 @@ def testSettings():
 def UnitTest():
     testSettings()
 
+if __name__=="__main__":
+    testCamera()

@@ -38,6 +38,7 @@ def main():
         Test.UnitTest()
     print('Load mainController')
     mainController = MainController.MainController()
+    MainController.__controller = mainController 
     mainController.start()
     sys.exit(app.exec_())
 

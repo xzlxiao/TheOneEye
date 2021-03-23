@@ -21,11 +21,11 @@ Dependencies：
 Updating Records:
 2021-01-22 09:38:15 xzl
 """
-from PyQt5.QtWidgets import QMainWindow, QFrame, QWidget, QGridLayout
+from PyQt5.QtWidgets import QMainWindow, QFrame, QWidget, QGridLayout, QMenu, QAction
 import numpy as np
 import cv2
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtGui import QMovie, QResizeEvent
+from PyQt5.QtGui import QMovie, QResizeEvent, QMouseEvent, QContextMenuEvent
 from PyQt5.QtCore import pyqtSignal, QObject, QEvent
 from PyQt5.uic import loadUi
 from Views import WinBase, XLabel
@@ -37,6 +37,7 @@ from Views.MainWindow import MainWindow
 from Views.XLabel import XLabel
 from Views import TestCameraWin, ContentsNavWin, MachineVisionWin
 from Entity.CameraInterface import CameraInterface
+from Control import MainController
 import sys
 sys.path.append("../")
 
@@ -54,6 +55,13 @@ class ViewController(QObject):
         self.mTestMovieShow = None
         self.windowLoad()
 
+        self.mCamregister = []
+        self.mCamregister.append(self.on_add_camera0_view)
+        self.mCamregister.append(self.on_add_camera1_view)
+        self.mCamregister.append(self.on_add_camera2_view)
+        self.mCamregister.append(self.on_add_camera3_view)
+        self.mCamregister.append(self.on_add_camera4_view)
+
 # 方法
     def windowLoad(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -62,7 +70,6 @@ class ViewController(QObject):
         if XSetting.isShowBorder:
             self.mMainFrame.setStyleSheet("border:2px solid rgba(255, 0, 0, 1);")
         self.mMainFrame.show()
-        self.eventFilterInstall()
 
         self.windowsInstall(ContentsNavWin.ContentsNavWin)
         self.windowsInstall(MachineVisionWin.MachineVisionWin)
@@ -70,7 +77,10 @@ class ViewController(QObject):
         ### 摄像头测试 begin
         test_camera_win = self.windowsInstall(TestCameraWin.TestCameraWin)
         test_camera_win.setCamera(self.mTestCamera)
+        test_camera_win.setButton()
         ### 摄像头测试 end
+
+        self.eventFilterInstall()
 
     def windowsInstall(self, win_type):
         '''
@@ -89,6 +99,7 @@ class ViewController(QObject):
     def eventFilterInstall(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mMainWin.installEventFilter(self)
+        self.mFrameList[1].frameViewArea.installEventFilter(self)
 
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -155,8 +166,41 @@ class ViewController(QObject):
                 if self.mCurrentWin is not None:
                     self.mCurrentWin.setReturnButtonLoc()
                 isEventGot = True
+        elif watched is self.mFrameList[1].frameViewArea:
+            if event.type() == QContextMenuEvent.MouseButtonRelease:
+                if event.button() == QtCore.Qt.RightButton:
+                    self.event_frameViewArea_menu(event)
 
         return isEventGot
+    
+    def event_frameViewArea_menu(self, event):
+        menu=QMenu(self.mFrameList[1].frameViewArea)
+        camera_list = QMenu(menu)
+        camera_list.setTitle('新建相机视图')
+        controller = MainController.getController()
+        camera_names = controller.mCameraController.getAvailableCameraNames()
+        for ind, name in enumerate(camera_names):
+            cam_action = QAction(name, camera_list)
+            cam_action.triggered.connect(self.mCamregister[ind])
+            camera_list.addAction(cam_action)
+        menu.addMenu(camera_list)
+        menu.exec_(event.globalPos())
+
+    def on_add_camera0_view(self):
+        print('打开第0个相机')
+
+    def on_add_camera1_view(self):
+        print('打开第1个相机')
+
+    def on_add_camera2_view(self):
+        print('打开第2个相机')
+
+    def on_add_camera3_view(self):
+        print('打开第3个相机')
+
+    def on_add_camera4_view(self):
+        print('打开第4个相机')
+
 
     def slotChangeWin(self, win):
         myDebug(self.__class__.__name__, get_current_function_name())

@@ -22,7 +22,7 @@ pass
 Updating Records:
 2021-01-22 09:38:15 xzl
 """
-from PyQt5.QtWidgets import QApplication, QWidget,QLabel, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget,QLabel, QGridLayout, QPushButton, QVBoxLayout
 from PyQt5 import QtCore, QtWidgets, QtGui, uic, QtMultimediaWidgets
 from PyQt5.QtCore import pyqtSignal, QObject
 
@@ -43,21 +43,23 @@ class TestCameraWin(WinBase.WinBase):
         self.mCameraShow = XLabel.XLabel(self)
 
         self.mainlayout1.replaceWidget(self.lbCameraShow, self.mCameraShow)
+        
+        
         self.lbCameraShow.hide()
         self.mCameraShow.setStyleSheet("background-color: rgb(114, 159, 200);")
         self.mCameraShow.show()
         self.mReturnButton.setParent(self)
-        self.mReturnButton.show()
+
         self.id = 'TestCameraWin'
         self.name = 'TestCameraWin'
-        self.mOpenCameraButton = QPushButton()
-        self.mCloseCameraButton = QPushButton()
+        self.mOpenCameraButton = QPushButton(self)
+        self.mCloseCameraButton = QPushButton(self)
         self.mCamera = None
 
     def showEvent(self, event):
         self.setReturnButtonLoc()
 
-    def hideEvet(self, event):
+    def hideEvent(self, event):
         pass
 
     def setCamera(self, camera):
@@ -77,19 +79,20 @@ class TestCameraWin(WinBase.WinBase):
         self.mOpenCameraButton.setStyleSheet(style)
         self.mCloseCameraButton.setStyleSheet(style)
 
-        self.mOpenCameraButton.setFixedHeight(50)
+        self.mOpenCameraButton.setFixedHeight(40)
         self.mOpenCameraButton.setMaximumWidth(200)
         self.mOpenCameraButton.setText(r"Open Camera")
         self.mOpenCameraButton.clicked.connect(self.on_OpenCameraButton)
         self.mOpenCameraButton.move(50, 50)
         self.mOpenCameraButton.show()
 
-        self.mCloseCameraButton.setFixedHeight(50)
+        self.mCloseCameraButton.setFixedHeight(40)
         self.mCloseCameraButton.setMaximumWidth(200)
         self.mCloseCameraButton.setText(r"Close Camera")
         self.mCloseCameraButton.clicked.connect(self.on_CloseCameraButton)
         self.mCloseCameraButton.move(50, 250)
         self.mCloseCameraButton.show()
+        self.mReturnButton.show()
 
     def on_OpenCameraButton(self):
         if self.mCamera is not None:

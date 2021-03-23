@@ -25,9 +25,11 @@ from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from Views import MainWindow
 from Common.DebugPrint import myDebug, get_current_function_name
-from Control import CameraController, ViewController
+from Control import CameraController, ViewController, CameraController
 import sys
 sys.path.append("../")
+
+__controller = None
 
 class MainController(QtCore.QObject):
     def __init__(self, *arg):
@@ -35,6 +37,7 @@ class MainController(QtCore.QObject):
         super(MainController, self).__init__(*arg)
         self.mMainLoopTimer = QtCore.QTimer(self)
         self.mViewController = ViewController.ViewController()
+        self.mCameraController = CameraController.CameraController()
         self.initConnect()
 
     def start(self):
@@ -50,5 +53,8 @@ class MainController(QtCore.QObject):
 
     def mainLoop(self):
         # myDebug(self.__class__.__name__, get_current_function_name())
-        pass
+        self.mCameraController.run()
     
+
+def getController()->MainController:
+    return __controller
