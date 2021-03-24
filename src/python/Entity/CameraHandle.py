@@ -41,14 +41,14 @@ class CameraHandle:
     def __init__(self, camera: CameraInterface):
         self.image_label = XLabel.XLabel()
         self.image_label.hide()
-        self.image_process = []     # 函数指针列表 func(image_src)->image_dst
+        self.mProcessList = []     # 函数指针列表 func(image_src)->image_dst
         self.mCamera = camera
 
     def image_process(self):
         if self.mCamera.mFrame is not None:
-            if len(self.image_process):
+            if len(self.mProcessList):
                 image = copy.deepcopy(self.mCamera.mFrame)
-                for func in self.image_process:
+                for func in self.mProcessList:
                     image = func(image)
                 self.image_label.mImage = image
             else:

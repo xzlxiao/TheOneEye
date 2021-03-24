@@ -55,12 +55,12 @@ class ViewController(QObject):
         self.mTestMovieShow = None
         self.windowLoad()
 
-        self.mCamregister = []
-        self.mCamregister.append(self.on_add_camera0_view)
-        self.mCamregister.append(self.on_add_camera1_view)
-        self.mCamregister.append(self.on_add_camera2_view)
-        self.mCamregister.append(self.on_add_camera3_view)
-        self.mCamregister.append(self.on_add_camera4_view)
+        # self.mCamregister = []
+        # self.mCamregister.append(self.on_add_camera0_view)
+        # self.mCamregister.append(self.on_add_camera1_view)
+        # self.mCamregister.append(self.on_add_camera2_view)
+        # self.mCamregister.append(self.on_add_camera3_view)
+        # self.mCamregister.append(self.on_add_camera4_view)
 
 # 方法
     def windowLoad(self):
@@ -99,7 +99,7 @@ class ViewController(QObject):
     def eventFilterInstall(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mMainWin.installEventFilter(self)
-        self.mFrameList[1].frameViewArea.installEventFilter(self)
+        # self.mFrameList[1].mFrameViewArea.installEventFilter(self)
 
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -166,40 +166,47 @@ class ViewController(QObject):
                 if self.mCurrentWin is not None:
                     self.mCurrentWin.setReturnButtonLoc()
                 isEventGot = True
-        elif watched is self.mFrameList[1].frameViewArea:
-            if event.type() == QContextMenuEvent.MouseButtonRelease:
-                if event.button() == QtCore.Qt.RightButton:
-                    self.event_frameViewArea_menu(event)
+        # elif watched is self.mFrameList[1].mFrameViewArea:
+        #     if event.type() == QContextMenuEvent.MouseButtonRelease:
+        #         if event.button() == QtCore.Qt.RightButton:
+        #             self.event_frameViewArea_menu(event)
 
         return isEventGot
     
-    def event_frameViewArea_menu(self, event):
-        menu=QMenu(self.mFrameList[1].frameViewArea)
-        camera_list = QMenu(menu)
-        camera_list.setTitle('新建相机视图')
-        controller = MainController.getController()
-        camera_names = controller.mCameraController.getAvailableCameraNames()
-        for ind, name in enumerate(camera_names):
-            cam_action = QAction(name, camera_list)
-            cam_action.triggered.connect(self.mCamregister[ind])
-            camera_list.addAction(cam_action)
-        menu.addMenu(camera_list)
-        menu.exec_(event.globalPos())
+    # def event_frameViewArea_menu(self, event):
+    #     menu=QMenu(self.mFrameList[1].mFrameViewArea)
+    #     menu.setStyleSheet("""
+    #     color: rgb(0, 243, 255);
+    #     background-color: rgba(255, 255, 255, 0); 
+    #     border:2px solid rgb(0, 108, 255);
+    #     selection-background-color: rgba(183, 212, 255, 150);
+    #     """
+    #     )
+    #     camera_list = QMenu(menu)
+    #     camera_list.setTitle('新建相机视图')
+    #     controller = MainController.getController()
+    #     camera_names = controller.mCameraController.getAvailableCameraNames()
+    #     for ind, name in enumerate(camera_names):
+    #         cam_action = QAction(name, camera_list)
+    #         cam_action.triggered.connect(self.mCamregister[ind])
+    #         camera_list.addAction(cam_action)
+    #     menu.addMenu(camera_list)
+    #     menu.exec_(event.globalPos())
 
-    def on_add_camera0_view(self):
-        print('打开第0个相机')
+    # def on_add_camera0_view(self):
+    #     print('打开第0个相机')
 
-    def on_add_camera1_view(self):
-        print('打开第1个相机')
+    # def on_add_camera1_view(self):
+    #     print('打开第1个相机')
 
-    def on_add_camera2_view(self):
-        print('打开第2个相机')
+    # def on_add_camera2_view(self):
+    #     print('打开第2个相机')
 
-    def on_add_camera3_view(self):
-        print('打开第3个相机')
+    # def on_add_camera3_view(self):
+    #     print('打开第3个相机')
 
-    def on_add_camera4_view(self):
-        print('打开第4个相机')
+    # def on_add_camera4_view(self):
+    #     print('打开第4个相机')
 
 
     def slotChangeWin(self, win):

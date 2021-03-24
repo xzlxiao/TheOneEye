@@ -26,7 +26,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from PyQt5.QtCore import pyqtSignal, QObject
 
 from PyQt5.uic import loadUi
-from Views import WinBase, XLabel
+from Views import WinBase, MultiViewFrame
 from Common.XSetting import XSetting
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
@@ -43,6 +43,15 @@ class MachineVisionWin(WinBase.WinBase):
 
         self.mReturnButton.setParent(self)
         self.mReturnButton.show()
+
+        self.mFrameViewArea = MultiViewFrame.MultiViewFrame(self)
+
+        self.gridLayoutViews.replaceWidget(self.frameViewArea, self.mFrameViewArea)
+        self.mFrameViewArea.show()
+        self.mFrameViewArea.setMinimumSize(500, 0)
+        self.frameViewArea.hide()
+        self.frameViewArea.destroy()
+        
         self.mkConnect()
 
     def mkConnect(self):

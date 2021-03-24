@@ -41,21 +41,20 @@ class XCameraType:
     X_RealsenseT_CAM = 2
 
 
-
 class CameraController(QObject):
     signalCamerasChanged = pyqtSignal()
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(CameraController, self).__init__(*args)
-        self.mCameraList = []
-        self.mCameraHandledImage = []
+        self.mCameraList = {}
+        self.mCameraHandledImage = {}
         self.mCameraAvailable = []
         self.mCameraNum = 0
 
     def run(self):
         # myDebug(self.__class__.__name__, get_current_function_name())
         self.CamerasDetect()
-        for handle in self.mCameraHandledImage:
+        for handle in self.mCameraHandledImage.values():
             handle.image_process()
 
     def CamerasDetect(self):
@@ -76,22 +75,25 @@ class CameraController(QObject):
         if isChanged:
             self.signalCamerasChanged.emit()
 
-    def StartCamera(self, cam_id: int, camera_type: XCameraType):
+    def startCamera(self, cam_id: int, camera_type:XCameraType=XCameraType.X_USB_CAM):
         myDebug(self.__class__.__name__, get_current_function_name())
         if cam_id > len(self.mCameraAvailable):
             raise Exception('不存在第%d号摄像头' % cam_id)
         if camera_type == XCameraType.X_USB_CAM:
-            self.mCameraList.append(CameraInterface(camera_info=self.mCameraAvailable[cam_id]))
-            self.mCameraList[-1].openCamera()
-            self.mCameraHandledImage.append(CameraHandle(self.mCameraList[-1]))
+            if cam_id in self.mCameraList.keys():
+                pass
+            else:
+                self.mCameraList[cam_id] = CameraInterface(camera_info=self.mCameraAvailable[cam_id])
+                self.mCameraList[cam_id].openCamera()
+                self.mCameraHandledImage[cam_id] = CameraHandle(self.mCameraList[cam_id])
         else:
             raise Exception("暂不支持该型号摄像头")
 
     def releaseCamera(self, cam_id: int):
         myDebug(self.__class__.__name__, get_current_function_name())
-        self.mCameraHandledImage.remove(cam_id)
+        self.mCameraHandledImage.pop(cam_id)
         self.mCameraList[cam_id].releaseCamera()
-        self.mCameraList.remove(cam_id)
+        self.mCameraList.pop(cam_id)
 
     def getAvailableCameraNames(self):
         ret = []
