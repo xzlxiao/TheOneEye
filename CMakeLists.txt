@@ -21,6 +21,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
+set(SRC src/cpp/)
 
 set(RESOURCE_DIR resource/resource.qrc)
 set(OpenCV_DIR /usr/local/cortexbot/opencv)
@@ -28,14 +29,14 @@ find_package(OpenCV REQUIRED)
 
 find_package(Qt5 REQUIRED Widgets Network)
 
-include_directories(UserInteraction
-    Test
-    Algorithm
-    Control
-    Entity
-    Input
-    Common
-    Views
+include_directories(${SRC}UserInteraction
+    ${SRC}Test
+    ${SRC}Algorithm
+    ${SRC}Control
+    ${SRC}Entity
+    ${SRC}Input
+    ${SRC}Common
+    ${SRC}Views
     ${OpenCV_INCLUDE_DIRS}
     )
 
@@ -47,33 +48,33 @@ add_custom_command(OUTPUT  COPY_RES COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CUR
 add_custom_target(CopyTask ALL DEPENDS COPY_RES)
 
 set(ControlSrc
-    Control/MainController
-    Control/CameraController
-    Control/ViewController)
+    ${SRC}Control/MainController
+    ${SRC}Control/CameraController
+    ${SRC}Control/ViewController)
 
 set(AlgorithmSrc
-    Algorithm/AlgorithmTest)
+    ${SRC}Algorithm/AlgorithmTest)
 
 set(CommonSrc
-    Common/Common
-    Common/DebugPrint
-    Common/XSetting)
+    ${SRC}Common/Common
+    ${SRC}Common/DebugPrint
+    ${SRC}Common/XSetting)
 
 set(EntitySrc
-    Entity/EntityTest
-    Entity/CameraBase
-    Entity/CameraInterface)
+    ${SRC}Entity/EntityTest
+    ${SRC}Entity/CameraBase
+    ${SRC}Entity/CameraInterface)
 
 set(TestSrc
-    Test/Test)
+    ${SRC}Test/Test)
 
 set(ViewsSrc
-    Views/MainWindow
-    Views/MainWindow.ui
-    Views/WinBase
-    Views/TestCameraWin
-    Views/TestCameraWin.ui
-    Views/XLabel
+    ${SRC}Views/MainWindow
+    ${SRC}Views/MainWindow.ui
+    ${SRC}Views/WinBase
+    ${SRC}Views/TestCameraWin
+    ${SRC}Views/TestCameraWin.ui
+    ${SRC}Views/XLabel
     )
 
 add_executable(TheOneEye

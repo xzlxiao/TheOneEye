@@ -33,6 +33,7 @@ class XSetting(QObject):
     isShowBorder = False
     isCameraDebug = False
 
+
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(XSetting, self).__init__(*args)
@@ -44,30 +45,26 @@ class XSetting(QObject):
         print("Test/Name: {}".format(XSetting.mName))
 
     @staticmethod
-    def setValue(key: str, value: str):
+    def setValue(key: str, value: str, ConfigFileDir="Config.ini"):
         myDebug(XSetting.__class__.__name__, get_current_function_name())
-        ConfigFileDir = "Config.ini"
         my_setting = QSettings(ConfigFileDir, QSettings.IniFormat)
         my_setting.setValue(key, value)
 
     @staticmethod
-    def getValue(key: str) -> str:
+    def getValue(key: str, ConfigFileDir="Config.ini") -> str:
         myDebug(XSetting.__class__.__name__, get_current_function_name())
-        ConfigFileDir = "Config.ini"
         my_setting = QSettings(ConfigFileDir, QSettings.IniFormat)
         return my_setting.value(key, "Fail", type=str)
 
     @staticmethod
-    def removeValue(key: str):
+    def removeValue(key: str, ConfigFileDir="Config.ini"):
         myDebug(XSetting.__class__.__name__, get_current_function_name())
-        ConfigFileDir = "Config.ini"
         my_setting = QSettings(ConfigFileDir, QSettings.IniFormat)
         my_setting.remove(key)
 
     @staticmethod
-    def loadSettingFile():
+    def loadSettingFile(ConfigFileDir="Config.ini"):
         myDebug(XSetting.__class__.__name__, get_current_function_name())
-        ConfigFileDir = "Config.ini"
         my_setting = QSettings(ConfigFileDir, QSettings.IniFormat)
         XSetting.mName = my_setting.value("Test/Name", "Fail", type=str)
         DebugPrint.isPrintDebug = my_setting.value("Debug/isDebug", False, type=bool)

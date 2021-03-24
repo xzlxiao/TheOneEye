@@ -27,6 +27,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 from PyQt5.uic import loadUi
 from Views import WinBase, XLabel
+from Common.XSetting import XSetting
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
@@ -35,7 +36,7 @@ class MachineVisionWin(WinBase.WinBase):
     def __init__(self, *arg):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(MachineVisionWin, self).__init__(*arg)
-        loadUi('Views/MachineVisionWin.ui', self)
+        loadUi(XSetting.getValue('Python/SrcDir')+'Views/MachineVisionWin.ui', self)
 
         self.id = 'MachineVisionWin'
         self.name = 'MachineVisionWin'

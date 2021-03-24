@@ -23,6 +23,7 @@ Updating Records:
 2021-01-22 09:38:15 xzl
 """
 import sys
+sys.path.append('./src/python')
 import cv2
 from Control import MainController
 from Test import Test

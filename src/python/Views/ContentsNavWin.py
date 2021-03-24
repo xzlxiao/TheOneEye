@@ -27,6 +27,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 from PyQt5.uic import loadUi
 from Views import WinBase, XLabel
+from Common.XSetting import XSetting
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
@@ -36,7 +37,7 @@ class ContentsNavWin(WinBase.WinBase):
     def __init__(self, *arg):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(ContentsNavWin, self).__init__(*arg)
-        loadUi('Views/ContentsNavWin.ui', self)
+        loadUi(XSetting.getValue('Python/SrcDir')+'Views/ContentsNavWin.ui', self)
 
         self.id = 'ContentsNavWin'
         self.name = 'ContentsNavWin'
