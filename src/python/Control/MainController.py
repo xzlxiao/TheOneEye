@@ -26,6 +26,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from Views import MainWindow
 from Common.DebugPrint import myDebug, get_current_function_name
 from Control import CameraController, ViewController, CameraController
+from Entity.ImageHandle import ImageHandle
+import time
 import sys
 sys.path.append("../")
 
@@ -38,12 +40,14 @@ class MainController(QtCore.QObject):
         self.mMainLoopTimer = QtCore.QTimer(self)
         self.mViewController = ViewController.ViewController()
         self.mCameraController = CameraController.CameraController()
+        self.mImageHandle = []
         self.initConnect()
+        # self.t1 = 0.0
 
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mViewController.start()
-        self.mMainLoopTimer.start(50)
+        self.mMainLoopTimer.start(1000/30)
 
         self.mViewController.navigateTo("ContentsNavWin")
 
@@ -53,8 +57,31 @@ class MainController(QtCore.QObject):
 
     def mainLoop(self):
         # myDebug(self.__class__.__name__, get_current_function_name())
+        
         self.mCameraController.run()
+        for handle in self.mImageHandle:
+            # t1 = time.time()
+            handle.image_process()
+            # t2 = time.time()
+            # print(t2-t1)
+        # t2 = time.time()
+        # print(t2-t1)
     
+    def addImageHandle(self, image_handle: ImageHandle):
+        self.mImageHandle.append(image_handle)
+
+    def removeImageHandle(self, image_handle: ImageHandle):
+        self.mImageHandle.remove(image_handle)
+
+    def getInputFlowList(self):
+        camera_list = self.mCameraController.getCameraList()
+        video_list = []
+        robot_list = []
+        ret = []
+        ret.extend(camera_list)
+        ret.extend(video_list)
+        ret.extend(robot_list)
+        return ret
 
 def getController()->MainController:
     return __controller

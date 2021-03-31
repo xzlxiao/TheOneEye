@@ -41,3 +41,6 @@ class CameraBase(QWidget):
 
     def setCameraID(self, id):
         self.mCameraId = id
+
+    def getImageFlow(self):
+        pass

@@ -55,12 +55,6 @@ class ViewController(QObject):
         self.mTestMovieShow = None
         self.windowLoad()
 
-        # self.mCamregister = []
-        # self.mCamregister.append(self.on_add_camera0_view)
-        # self.mCamregister.append(self.on_add_camera1_view)
-        # self.mCamregister.append(self.on_add_camera2_view)
-        # self.mCamregister.append(self.on_add_camera3_view)
-        # self.mCamregister.append(self.on_add_camera4_view)
 
 # 方法
     def windowLoad(self):

@@ -24,6 +24,7 @@ Updating Records:
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QPushButton
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtGui import QPixmap, QResizeEvent
 
 from PyQt5.uic import loadUi
 from Views import WinBase, XLabel
@@ -42,6 +43,19 @@ class ContentsNavWin(WinBase.WinBase):
         self.id = 'ContentsNavWin'
         self.name = 'ContentsNavWin'
 
+        self.mImage_T = QPixmap()
+        self.mImage_T.load('resource/icons/T.png')
+        self.mImage_O = QPixmap()
+        self.mImage_O.load('resource/icons/O.png')
+        self.mImage_E = QPixmap()
+        self.mImage_E.load('resource/icons/E.png')
+        
+        self.lbT.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbT.setPixmap(self.mImage_T.scaled(self.lbT.width(), self.lbT.height()))
+        self.lbO.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbO.setPixmap(self.mImage_O.scaled(self.lbO.width(), self.lbO.height()))
+        self.lbE.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbE.setPixmap(self.mImage_E.scaled(self.lbE.width(), self.lbE.height()))
 
         self.mkConnect()
 
@@ -58,3 +72,6 @@ class ContentsNavWin(WinBase.WinBase):
     def on_btnToMVForm(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.signalChangeWin.emit('MachineVisionWin')
+
+    def resizeEvent(self, e: QResizeEvent):
+        super().resizeEvent(e)

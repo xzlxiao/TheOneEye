@@ -27,13 +27,15 @@ sys.path.append("../")
 
 from Entity import CameraBase
 from PyQt5 import  QtWidgets,QtMultimediaWidgets
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSignal
 from PyQt5.QtMultimedia import QCamera, QCameraImageCapture, QCameraViewfinderSettings
 import numpy as np
 from Common.Common import Common
+import time
 
 
 class CameraInterface(CameraBase.CameraBase):
+    signalReleased = pyqtSignal()
     def __init__(self, *args, camera_info=None):
         super(CameraInterface, self).__init__(*args)
         # 定义相机实例对象并设置捕获模式
@@ -44,48 +46,83 @@ class CameraInterface(CameraBase.CameraBase):
         self.mFrame = None
         self.mCamera.setCaptureMode(QCamera.CaptureViewfinder)
         self.mCameraOpened = False  # 设置相机打开状态为未打开
-        self.mDisplayWidth = 450
-        self.mDisplayHeight = 450
-        self.mRate = 20
+        self.mDisplayWidth = 800
+        self.mDisplayHeight = 600
+        self.mRate = 10
+        self.mCameraName = None
+        self.mId = -1
 
         # 设置取景器分辨率
         self.setDisplaySize(self.mDisplayWidth, self.mDisplayHeight)
+        
+        self.setRate(self.mRate)
 
         # 初始化取景器
         self.mViewCamera = QtMultimediaWidgets.QCameraViewfinder(self)
+        self.mViewCamera.show()
         self.mCamera.setViewfinder(self.mViewCamera)
         self.mCamera.setCaptureMode(QCamera.CaptureStillImage)
 
         # 设置图像捕获
         self.mCapture = QCameraImageCapture(self.mCamera)
-        self.mCapture.setCaptureDestination(QCameraImageCapture.CaptureToBuffer)  # CaptureToBuffer
+        if self.mCapture.isCaptureDestinationSupported(QCameraImageCapture.CaptureToBuffer):
+            self.mCapture.setCaptureDestination(QCameraImageCapture.CaptureToBuffer)  # CaptureToBuffer
+
         # self.mCapture.error.connect(lambda i, e, s: self.alert(s))
         self.mCapture.imageAvailable.connect(self.readFrame)
 
         self.mTimerImageGrab = QTimer(self)
         self.mTimerImageGrab.timeout.connect(self.timerImgGrab)
+        # self.t1 = 0.0
+    def getID(self):
+        return self.mId 
+
+    def setID(self, id):
+        self.mId = id 
 
     def timerImgGrab(self):
         self.mCapture.capture('tmp.jpg')
 
     def readFrame(self, requestId, image):
-        self.mFrame = Common.qImage2Numpy(image.image())
+        self.mFrame = image.image().copy()
+        
+    def isOpen(self):
+        return self.mCameraOpened
 
     def openCamera(self):
         if not self.mCameraOpened:
             self.mCamera.start()
-            self.mTimerImageGrab.start(self.mRate)
+            
+            viewFinderSettings = QCameraViewfinderSettings()
+            rate_range = self.mCamera.supportedViewfinderFrameRateRanges()
+            if rate_range:
+                viewFinderSettings.setMinimumFrameRate(rate_range[0].minimumFrameRate)
+                viewFinderSettings.setMaximumFrameRate(rate_range[0].maximumFrameRate)
+            else:
+                viewFinderSettings.setMinimumFrameRate(1)
+                viewFinderSettings.setMaximumFrameRate(self.mRate)
+            self.mTimerImageGrab.start(1000/self.mRate)
             self.mCameraOpened = True
+            
 
     def releaseCamera(self):
         if self.mCameraOpened:
             self.mCamera.stop()
             self.mCameraOpened = False
+            self.signalReleased.emit()
+
+    def setCameraName(self, name: str):
+        self.mCameraName = name
+
+    def close(self):
+        self.releaseCamera()
+
+    def getName(self):
+        return self.mCameraName
 
     def takePictures(self, path: str):
         self.mCapture.setCaptureDestination(QCameraImageCapture.CaptureToFile)
         self.mCapImg.capture(path)
-        # print(r"save image to file: {}".format(path))
         self.mCapture.setCaptureDestination(QCameraImageCapture.CaptureToBuffer)
 
     def takeVideo(self, path:str):
@@ -100,3 +137,10 @@ class CameraInterface(CameraBase.CameraBase):
         viewFinderSettings = QCameraViewfinderSettings()
         viewFinderSettings.setResolution(self.mDisplayWidth, self.mDisplayHeight)
         self.mCamera.setViewfinderSettings(viewFinderSettings)
+
+    def setRate(self, rate):
+        self.mRate = rate 
+        
+
+    def getImageFlow(self):
+        return self.mFrame
