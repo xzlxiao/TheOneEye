@@ -1,3 +1,5 @@
+from functools import partial
+
 import PyQt5
 from PyQt5.QtWidgets import QLabel, QFrame, QMenu, QAction, QGridLayout, QSizePolicy, QVBoxLayout, QListView
 from PyQt5 import QtCore, QtWidgets, QtGui, uic, QtMultimediaWidgets
@@ -9,6 +11,7 @@ from Entity.CameraInterface import CameraInterface
 from Views.CameraViewFrame import CameraViewFrame
 from Views.ImageProcViewFrame import ImageProcViewFrame
 from Views.ViewFrameBase import ViewFrameBase
+from Control.CameraController import XCameraType
 import copy
 
 class MultiViewFrame(QFrame):
@@ -52,10 +55,11 @@ class MultiViewFrame(QFrame):
         camera_list = QMenu(menu)
         camera_list.setTitle('新建相机视图')
         controller = MainController.getController()
-        camera_names = controller.mCameraController.getAvailableCameraNames()
+        camera_names, camera_types = controller.mCameraController.getAvailableCameraNames()
         for ind, name in enumerate(camera_names):
             cam_action = QAction(name, camera_list)
-            cam_action.triggered.connect(self.mCameregister[ind])
+            # cam_action.triggered.connect(self.mCameregister[ind])
+            cam_action.triggered.connect(partial(self.on_add_camera_view, ind, camera_types[ind]))
             camera_list.addAction(cam_action)
         menu.addMenu(camera_list)
 
@@ -80,6 +84,19 @@ class MultiViewFrame(QFrame):
         myDebug(self.__class__.__name__, get_current_function_name())
         view = ImageProcViewFrame(self)
         self.addSubview(view)
+
+    def on_add_camera_view(self, cam_id: int, cam_type: XCameraType):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        camera_controller = MainController.getController().mCameraController
+        camera = camera_controller.getCamera(cam_id)
+        if camera and camera.isOpen():
+            print('该相机已经打开')
+        else:
+            camera_controller.startCamera(cam_id, cam_type)
+            view = CameraViewFrame(self)
+            view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList) - 1])
+            self.addSubview(view)
+            print('打开第%d个相机'%cam_id)
 
     def on_add_camera0_view(self):
         myDebug(self.__class__.__name__, get_current_function_name())

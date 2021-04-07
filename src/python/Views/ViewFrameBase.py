@@ -1,3 +1,5 @@
+from functools import partial
+
 from PyQt5.QtWidgets import QLabel, QFrame, QMenu, QAction, QGridLayout, QSizePolicy, QVBoxLayout
 from PyQt5 import QtCore, QtWidgets, QtGui, uic, QtMultimediaWidgets
 from PyQt5.QtGui import QContextMenuEvent, QPixmap, QResizeEvent
@@ -63,11 +65,11 @@ class ViewFrameBase(QFrame):
         camera_list = QMenu(menu)
         camera_list.setTitle('新建相机视图')
         controller = MainController.getController()
-        camera_names = controller.mCameraController.getAvailableCameraNames()
+        camera_names, camera_types = controller.mCameraController.getAvailableCameraNames()
         for ind, name in enumerate(camera_names):
             cam_action = QAction(name, camera_list)
             if self.parent():
-                cam_action.triggered.connect(self.parent().mCameregister[ind])
+                cam_action.triggered.connect(partial(self.parent().on_add_camera_view, ind, camera_types[ind]))
             camera_list.addAction(cam_action)
         menu.addMenu(camera_list)
 

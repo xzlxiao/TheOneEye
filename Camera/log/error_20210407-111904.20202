@@ -1,0 +1,4 @@
+Log file created at: 2021/04/07 11:19:04
+Running on machine: gr-MS-7C94
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0407 11:19:04.686503 20202 MVCAMAPI.cpp:342] CameraInit Failed, err:-18,Version:2.1.0.20,FriendlyName:MV-SUA202GC#0,SN:041003320410

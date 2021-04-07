@@ -59,7 +59,7 @@ class MachineVisionWin(WinBase.WinBase):
         self.mSlm = QStringListModel()
         self.listViewOption.setModel(self.mSlm)
 
-        movie = QMovie("resource/images/SE3.gif")
+        movie = QMovie("resource/images/AI.gif")
         # self.mImage_viewState = QPixmap()
         # self.mImage_viewState.load('resource/images/Grid4.png')
         

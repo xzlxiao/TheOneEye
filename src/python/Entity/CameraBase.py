@@ -26,12 +26,18 @@ import sys
 sys.path.append("../")
 from PyQt5.QtCore import pyqtSignal, QObject, QEvent
 from PyQt5.QtWidgets import QWidget
+from Views.XLabel import XLabel
 
 
 class CameraBase(QWidget):
+    signalReleased = pyqtSignal()
     def __init__(self, *args):
         super(CameraBase, self).__init__(*args)
         self.mCameraId = -1
+        self.mCameraOpened = False  # 设置相机打开状态为未打开
+        self.mCameraName = None
+        self.mFrame = None
+        self.mViewCamera = XLabel(self)
 
     def openCamera(self):
         pass
@@ -42,5 +48,20 @@ class CameraBase(QWidget):
     def setCameraID(self, id):
         self.mCameraId = id
 
+    def setID(self, id):
+        self.setCameraID(id)
+    
+    def getID(self):
+        return self.mCameraId
+
+    def isOpen(self):
+        return self.mCameraOpened
+
+    def setCameraName(self, name: str):
+        self.mCameraName = name
+
+    def getName(self):
+        return self.mCameraName
+
     def getImageFlow(self):
-        pass
+        return self.mFrame

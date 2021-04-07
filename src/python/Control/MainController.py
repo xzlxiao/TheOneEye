@@ -42,7 +42,7 @@ class MainController(QtCore.QObject):
         self.mCameraController = CameraController.CameraController()
         self.mImageHandle = []
         self.initConnect()
-        # self.t1 = 0.0
+        self.t1 = 0.0
 
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -57,15 +57,17 @@ class MainController(QtCore.QObject):
 
     def mainLoop(self):
         # myDebug(self.__class__.__name__, get_current_function_name())
-        
+        # t2 = time.time()
+        # print('总时间：', t2 - self.t1)
+        # self.t1 = t2
+        # t1 = time.time()
         self.mCameraController.run()
         for handle in self.mImageHandle:
             # t1 = time.time()
             handle.image_process()
-            # t2 = time.time()
-            # print(t2-t1)
         # t2 = time.time()
-        # print(t2-t1)
+        # print('计算时间：', t2-t1)
+
     
     def addImageHandle(self, image_handle: ImageHandle):
         self.mImageHandle.append(image_handle)

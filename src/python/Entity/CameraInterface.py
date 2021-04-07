@@ -35,7 +35,6 @@ import time
 
 
 class CameraInterface(CameraBase.CameraBase):
-    signalReleased = pyqtSignal()
     def __init__(self, *args, camera_info=None):
         super(CameraInterface, self).__init__(*args)
         # 定义相机实例对象并设置捕获模式
@@ -43,14 +42,10 @@ class CameraInterface(CameraBase.CameraBase):
             self.mCamera = QCamera(camera_info)
         else:
             self.mCamera = QCamera()
-        self.mFrame = None
         self.mCamera.setCaptureMode(QCamera.CaptureViewfinder)
-        self.mCameraOpened = False  # 设置相机打开状态为未打开
         self.mDisplayWidth = 800
         self.mDisplayHeight = 600
         self.mRate = 10
-        self.mCameraName = None
-        self.mId = -1
 
         # 设置取景器分辨率
         self.setDisplaySize(self.mDisplayWidth, self.mDisplayHeight)
@@ -74,20 +69,12 @@ class CameraInterface(CameraBase.CameraBase):
         self.mTimerImageGrab = QTimer(self)
         self.mTimerImageGrab.timeout.connect(self.timerImgGrab)
         # self.t1 = 0.0
-    def getID(self):
-        return self.mId 
-
-    def setID(self, id):
-        self.mId = id 
 
     def timerImgGrab(self):
         self.mCapture.capture('tmp.jpg')
 
     def readFrame(self, requestId, image):
         self.mFrame = image.image().copy()
-        
-    def isOpen(self):
-        return self.mCameraOpened
 
     def openCamera(self):
         if not self.mCameraOpened:
@@ -111,15 +98,6 @@ class CameraInterface(CameraBase.CameraBase):
             self.mCameraOpened = False
             self.signalReleased.emit()
 
-    def setCameraName(self, name: str):
-        self.mCameraName = name
-
-    def close(self):
-        self.releaseCamera()
-
-    def getName(self):
-        return self.mCameraName
-
     def takePictures(self, path: str):
         self.mCapture.setCaptureDestination(QCameraImageCapture.CaptureToFile)
         self.mCapImg.capture(path)
@@ -142,5 +120,4 @@ class CameraInterface(CameraBase.CameraBase):
         self.mRate = rate 
         
 
-    def getImageFlow(self):
-        return self.mFrame
+    

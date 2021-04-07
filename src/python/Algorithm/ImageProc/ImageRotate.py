@@ -7,7 +7,7 @@ class ImageRotate(ImageProcBase):
     def __init__(self) -> None:
         super().__init__()
         self.Name = r'Color Rotate'
-        self.mDegree = 90
+        self.mDegree = 70
     
     def process(self, image: np.ndarray) -> np.ndarray:
         rows = image.shape[0]

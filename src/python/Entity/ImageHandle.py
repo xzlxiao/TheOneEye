@@ -52,7 +52,7 @@ class ImageHandle:
         if self.mImageFlow:
             if self.mImageFlow.mFrame is not None:
                 if len(self.mProcessList):
-                    image = Common.qImage2Numpy(self.mImageFlow.mFrame) 
+                    image = Common.qImage2Numpy(self.mImageFlow.mFrame.convertToFormat(QImage.Format_ARGB32), 4)
                     for image_proc in self.mProcessList:
                         image = image_proc.process(image)
                     self.image_label.mImage = Common.numpy2QImage(image) 

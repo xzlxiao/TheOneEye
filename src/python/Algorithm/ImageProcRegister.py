@@ -1,4 +1,4 @@
-from Algorithm.ImageProc import ImageProcColorReverse, ImageRotate
+from Algorithm.ImageProc import ImageProcColorReverse, ImageRotate, ImageQR
 
 
 
@@ -8,6 +8,7 @@ class ImageProcRegister:
         self.mAlgorithmList = [
             ImageProcColorReverse.ImageProcColorReverse(),
             ImageRotate.ImageRotate(),
+            ImageQR.ImageQR(),
         ]
 
     def getNames(self):

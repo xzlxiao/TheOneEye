@@ -32,18 +32,28 @@ from PyQt5.QtGui import QMovie, QResizeEvent
 from PyQt5.QtMultimedia import QCameraInfo
 from PyQt5.QtCore import pyqtSignal, QObject, QEvent
 from Entity.CameraInterface import CameraInterface
+try: 
+    import Common.mvsdk as mvsdk
+except:
+    mvsdk = None
+from Entity.CameraMindVision import CameraMindVision
 import copy
 # from Entity.CameraHandle import CameraHandle
+import time
+import threading
 
-
+lock = threading.Lock()
 class XCameraType:
     X_USB_CAM = 0
     X_RealsenseD_CAM = 1
     X_RealsenseT_CAM = 2
+    X_MindVision = 3
 
 
 class CameraController(QObject):
     signalCamerasChanged = pyqtSignal()
+    isMindVisionDetectedOn = False
+    detects_MindVision = None
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(CameraController, self).__init__(*args)
@@ -58,23 +68,49 @@ class CameraController(QObject):
         # for handle in self.mCameraHandledImage.values():
         #     handle.image_process()
 
+    @staticmethod
+    def CamerasMindVisionDetect_thread_func():
+        lock.acquire(True)
+        CameraController.detects_MindVision = mvsdk.CameraEnumerateDevice()
+        CameraController.isMindVisionDetectedOn = False
+        lock.release()
+
     def CamerasDetect(self):
         # myDebug(self.__class__.__name__, get_current_function_name())
-        detects = QCameraInfo.availableCameras()
+        detects_usb = QCameraInfo.availableCameras()
+        if not CameraController.isMindVisionDetectedOn and mvsdk:
+            CameraController.isMindVisionDetectedOn = True
+            threading.Thread(target=CameraController.CamerasMindVisionDetect_thread_func).start()
+        # detects_MindVision = Common.mvsdk.CameraEnumerateDevice()
+        detects_MindVision = CameraController.detects_MindVision
+        detects_usb_size = len(detects_usb)
+        detects_MindVision_size = 0
+        if detects_MindVision:
+            detects_MindVision_size = len(detects_MindVision)
         isChanged = False
-        if len(self.mCameraAvailable) == len(detects):
-            for i, data in enumerate(detects):
+        if len(self.mCameraAvailable) == detects_usb_size + detects_MindVision_size:
+            for i, data in enumerate(detects_usb):
                 if self.mCameraAvailable[i] != data:
                     isChanged = True
                     self.mCameraAvailable[i] = data
+            if detects_MindVision:
+                for i, data in enumerate(detects_MindVision):
+                    if self.mCameraAvailable[i+detects_usb_size] != data:
+                        isChanged = True
+                        self.mCameraAvailable[i+detects_usb_size] = data
+
         else:
             isChanged = True
             self.mCameraAvailable = []
-            for data in detects:
+            for data in detects_usb:
                 self.mCameraAvailable.append(data)
+            if detects_MindVision:
+                for data in detects_MindVision:
+                    self.mCameraAvailable.append((data))
 
         if isChanged:
             self.signalCamerasChanged.emit()
+
 
     def startCamera(self, cam_id: int, camera_type:XCameraType=XCameraType.X_USB_CAM):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -92,13 +128,18 @@ class CameraController(QObject):
         
         if cam_id > len(self.mCameraAvailable):
             raise Exception('不存在第%d号摄像头' % cam_id)
+        cam_index = len(self.mCameraList)
         if camera_type == XCameraType.X_USB_CAM:
-            cam_index = len(self.mCameraList)
             self.mCameraList[cam_index] = CameraInterface(camera_info=self.mCameraAvailable[cam_id])
             self.mCameraList[cam_index].setID(cam_index)
             self.mCameraList[cam_index].openCamera()
             self.mCameraList[cam_index].mViewCamera.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
             self.mCameraList[cam_index].setCameraName(self.mCameraAvailable[cam_id].description())
+        elif camera_type == XCameraType.X_MindVision:
+            self.mCameraList[cam_index] = CameraMindVision(camera_info=self.mCameraAvailable[cam_id])
+            self.mCameraList[cam_index].setID(cam_index)
+            self.mCameraList[cam_index].openCamera()
+            self.mCameraList[cam_index].setCameraName(self.mCameraAvailable[cam_id].GetFriendlyName())
             # self.mCameraList[cam_index].mViewCamera.setStyleSheet("border:2px solid rgb(100, 100, 100);")
             # cam_name = self.mCameraAvailable[cam_id].description()
             # cam_name_label = QLabel(self.mCameraList[cam_index].mViewCamera)
@@ -126,11 +167,16 @@ class CameraController(QObject):
 
     def getAvailableCameraNames(self):
         myDebug(self.__class__.__name__, get_current_function_name())
-        ret = []
+        names = []
+        types = []
         for i in self.mCameraAvailable:
-            ret.append(i.description())
-
-        return ret 
+            try:
+                names.append(i.description())
+                types.append(XCameraType.X_USB_CAM)
+            except:
+                names.append(i.GetFriendlyName())
+                types.append(XCameraType.X_MindVision)
+        return names, types
 
     def getCameraList(self):
         myDebug(self.__class__.__name__, get_current_function_name())

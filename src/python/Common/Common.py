@@ -40,10 +40,10 @@ class Common:
         pass
 
     @staticmethod
-    def qImage2Numpy(qimg: QImage) -> np.ndarray:
+    def qImage2Numpy(qimg: QImage, channels=3) -> np.ndarray:
         ptr = qimg.constBits()
         ptr.setsize(qimg.byteCount())
-        mat = np.array(ptr).reshape(qimg.height(), qimg.width(), 4)  
+        mat = np.array(ptr).reshape(qimg.height(), qimg.width(), channels)
         return mat
     
     @staticmethod
