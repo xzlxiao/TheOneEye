@@ -1,4 +1,13 @@
-from Algorithm.ImageProc import ImageProcColorReverse, ImageRotate, ImageQR
+from Algorithm.ImageProc import ImageProcColorReverse, \
+ImageRotate, \
+ImageQR, \
+ImageCornerDetect, \
+ImageAdaptiveThresholding, \
+ImageOtsusBinarization, \
+ImageForegroundExtraction, \
+ImageOpticalFlow, \
+ImageKmean8, \
+ImageFaceDetect
 
 
 
@@ -9,6 +18,13 @@ class ImageProcRegister:
             ImageProcColorReverse.ImageProcColorReverse(),
             ImageRotate.ImageRotate(),
             ImageQR.ImageQR(),
+            ImageCornerDetect.ImageCornerDetect(),
+            ImageAdaptiveThresholding.ImageAdaptiveThresholding(),
+            ImageOtsusBinarization.ImageOtsusBinarization(),
+            ImageForegroundExtraction.ImageForegroundExtraction(),
+            ImageOpticalFlow.ImageOpticalFlow(),
+            ImageKmean8.ImageKmean8(),
+            ImageFaceDetect.ImageFaceDetect(),
         ]
 
     def getNames(self):

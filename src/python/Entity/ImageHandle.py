@@ -22,6 +22,7 @@ Updating Records:
 2021-03-23 10:43:40 xzl
 """
 
+import threading
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
@@ -45,21 +46,35 @@ class ImageHandle:
         self.image_label.hide()
         self.mProcessList = []     # 函数指针列表 func(image_src)->image_dst
         self.mImageFlow = image_flow
+        self.Image_Processing = None
+        self.isProcessing = False
 
     def image_process(self):
         # if self.mImageFlow:
         #     print(self.mImageFlow.mFrame)
+        # print(self.Image_Processing)
         if self.mImageFlow:
             if self.mImageFlow.mFrame is not None:
                 if len(self.mProcessList):
-                    image = Common.qImage2Numpy(self.mImageFlow.mFrame.convertToFormat(QImage.Format_ARGB32), 4)
-                    for image_proc in self.mProcessList:
-                        image = image_proc.process(image)
-                    self.image_label.mImage = Common.numpy2QImage(image) 
+                    if not self.isProcessing:
+                        self.isProcessing = True
+                        image = Common.qImage2Numpy(self.mImageFlow.mFrame.convertToFormat(QImage.Format_ARGB32), 4)
+                        t = threading.Thread(target=ImageHandle.image_process_thread, args=(image, self))
+                        t.start()
+                    if self.Image_Processing is not None:
+                        self.image_label.mImage = Common.numpy2QImage(self.Image_Processing) 
+                    else:
+                        self.image_label.mImage = self.mImageFlow.mFrame.copy()
                 else:
                     self.image_label.mImage = self.mImageFlow.mFrame.copy()
         elif self.image_label.mImage:
             self.image_label.mImage = None
+
+    @staticmethod
+    def image_process_thread(image, obj):
+        for image_proc in obj.mProcessList:
+            obj.Image_Processing = image_proc.process(image)
+            obj.isProcessing = False
     
     def setImageFlow(self, flow):
         self.mImageFlow = flow 

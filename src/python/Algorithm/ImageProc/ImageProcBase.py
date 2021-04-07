@@ -5,6 +5,7 @@ import copy
 class ImageProcBase:
     def __init__(self) -> None:
         self.Name = 'ImageProcBase'
+        self.mLastImage = None
 
     def channels(self, image):
         if image.ndim == 2:		#2维度表示长宽
