@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from Views import MainWindow
 from Common.DebugPrint import myDebug, get_current_function_name
-from Control import CameraController, ViewController, CameraController
+from Control import CameraController, ViewController, CameraController, RobotController
 from Entity.ImageHandle import ImageHandle
 import time
 import sys
@@ -40,6 +40,7 @@ class MainController(QtCore.QObject):
         self.mMainLoopTimer = QtCore.QTimer(self)
         self.mViewController = ViewController.ViewController()
         self.mCameraController = CameraController.CameraController()
+        self.mRobotController = RobotController.RobotController()
         self.mImageHandle = []
         self.initConnect()
         self.t1 = 0.0
@@ -47,6 +48,7 @@ class MainController(QtCore.QObject):
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mViewController.start()
+        self.mRobotController.start()
         self.mMainLoopTimer.start(1000/30)
 
         self.mViewController.navigateTo("ContentsNavWin")

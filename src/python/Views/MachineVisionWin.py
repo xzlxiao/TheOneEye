@@ -84,7 +84,7 @@ class MachineVisionWin(WinBase.WinBase):
         view_size = self.width()/4
         self.lbViewState.setMaximumSize(view_size, view_size)
 
-    def hideEvet(self, event):
+    def hideEvent(self, event):
         pass
 
     def slot_view_focaus_changed(self):

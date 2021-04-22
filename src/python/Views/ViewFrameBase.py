@@ -45,6 +45,7 @@ class ViewFrameBase(QFrame):
 
     def on_del_view(self):
         myDebug(self.__class__.__name__, get_current_function_name())
+        self.hide()
         self.destroy()
         self.signalDestroyed.emit(self)
 
@@ -54,35 +55,38 @@ class ViewFrameBase(QFrame):
 
     def mkQMenu(self):
         myDebug(self.__class__.__name__, get_current_function_name())
-        menu=QMenu(self)
-        menu.setStyleSheet("""
-        color: rgb(0, 243, 255);
-        background-color: rgba(255, 255, 255, 0); 
-        border:2px solid rgb(0, 108, 255);
-        selection-background-color: rgba(183, 212, 255, 150);
-        """
-        )
-        camera_list = QMenu(menu)
-        camera_list.setTitle('新建相机视图')
-        controller = MainController.getController()
-        camera_names, camera_types = controller.mCameraController.getAvailableCameraNames()
-        for ind, name in enumerate(camera_names):
-            cam_action = QAction(name, camera_list)
-            if self.parent():
-                cam_action.triggered.connect(partial(self.parent().on_add_camera_view, ind, camera_types[ind]))
-            camera_list.addAction(cam_action)
-        menu.addMenu(camera_list)
+        if self.parent():
+            menu = self.parent().mkQMenu()
+        else:
+            menu=QMenu(self)
+            menu.setStyleSheet("""
+            color: rgb(0, 243, 255);
+            background-color: rgba(255, 255, 255, 0); 
+            border:2px solid rgb(0, 108, 255);
+            selection-background-color: rgba(183, 212, 255, 150);
+            """
+            )
+        # camera_list = QMenu(menu)
+        # camera_list.setTitle('新建相机视图')
+        # controller = MainController.getController()
+        # camera_names, camera_types = controller.mCameraController.getAvailableCameraNames()
+        # for ind, name in enumerate(camera_names):
+        #     cam_action = QAction(name, camera_list)
+        #     if self.parent():
+        #         cam_action.triggered.connect(partial(self.parent().on_add_camera_view, ind, camera_types[ind]))
+        #     camera_list.addAction(cam_action)
+        # menu.addMenu(camera_list)
 
-        add_image_proc_action = QAction('添加图像处理视图', menu)
-        add_image_proc_action.triggered.connect(self.slot_add_image_proc_view)
-        menu.addAction(add_image_proc_action)
+        # add_image_proc_action = QAction('添加图像处理视图', menu)
+        # add_image_proc_action.triggered.connect(self.slot_add_image_proc_view)
+        # menu.addAction(add_image_proc_action)
 
         del_view_action = QAction('删除视图', menu)
         del_view_action.triggered.connect(self.on_del_view)
-        clear_view_action = QAction('清空视图', menu)
-        clear_view_action.triggered.connect(self.on_clear_views)
+        # clear_view_action = QAction('清空视图', menu)
+        # clear_view_action.triggered.connect(self.on_clear_views)
         menu.addAction(del_view_action)
-        menu.addAction(clear_view_action)
+        # menu.addAction(clear_view_action)
         return menu
 
     def slot_add_image_proc_view(self):

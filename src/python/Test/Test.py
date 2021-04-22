@@ -3,12 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from PyQt5.QtWidgets import QApplication
+
+from PyQt5.QtCore import pyqtSignal, QObject, QEvent
 # from PyQt5.QtCore import pyqtSignal, QObject, QEvent, QCoreApplication, QSettings
 import sys
 sys.path.append('../')
 sys.path.append('./')
 from Entity.CameraMindVision import CameraMindVision
 from Common import Common, XSetting
+from Entity.RobotEpuck import RobotEpuck
+import time 
 try: 
     import Common.mvsdk as mvsdk
 except:
@@ -47,6 +51,46 @@ def test_MV_SUA_camera():
         print('test')
     sys.exit(app.exec_())
 
+def test_robot():
+    app = QApplication(sys.argv)
+    robot = RobotEpuck(None, None, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
+    try:
+        robot.connect('192.168.3.5')
+        if robot.isConnected:
+            for i in range(3):
+                # if i%1==0:
+                #     print(i)
+                if i < 3:
+                    robot.mCommand[1] = 1
+                    # robot.mCommand[8] = 1
+                    # robot.mCommand[9] = 1
+                    # robot.mCommand[10] = 1
+                    # robot.mCommand[7] = 0x01
+                    # robot.mCommand[17] = 100
+                    # robot.mCommand[17] = 100
+                    # robot.mCommand[17] = 100
+                    # robot.mCommand[18] = 255
+                    robot.setSpeed(0, 0)
+                    robot.update()
+                    time.sleep(1)
+                # elif i < 20:
+                #     robot.setSpeed(100, -100)
+                #     robot.update()
+                #     time.sleep(1)
+                # robot.mCommand[4] = 0
+                # robot.mCommand[6] = 0
+                # robot.mCommand[3] = 0
+                # robot.mCommand[5] = 0
+                # robot.update()
+                print(robot.mCommand[4], ' ', robot.mCommand[6], ' ', robot.mCommand[3], ' ', robot.mCommand[5])
+                # time.sleep(1)
+    except KeyboardInterrupt:
+        print('Interrupted')
+        robot.setSpeed(0, 0)
+        robot.disconnect()
+    # sys.exit(app.exec_())
+    
+
 
 
 def testSettings():
@@ -62,5 +106,5 @@ def testSettings():
 def UnitTest():
     testSettings()
 
-if __name__=="__main__":
-    test_MV_SUA_camera()
+# if __name__=="__main__":
+#     test_MV_SUA_camera()

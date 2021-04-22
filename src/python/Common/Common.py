@@ -51,6 +51,15 @@ class Common:
         qimg = QImage(img.data, img.shape[1], img.shape[0], QImage.Format_ARGB32)
         return qimg
 
+    @staticmethod
+    def rgb565ToRgb888(img_src, rows, cols):
+        img_src = np.reshape(img_src, (rows, cols, 2))
+        img_dst = np.zeros((rows, cols, 3), dtype=np.uint8)
+        img_dst[:, :, 0] = img_src[:, :, 0]&0xF8
+        img_dst[:, :, 1] = (img_src[:, :, 0]&0x07)<<5 | (img_src[:, :, 1]&0xE0)>>3
+        img_dst[:, :, 1] = (img_src[:, :, 1]&0x1F)<<3
+        return img_dst
+
 class XRect:
     def __init__(self, x=0, y=0, width=0, height=0):
         self.width: int = width

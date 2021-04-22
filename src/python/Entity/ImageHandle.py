@@ -40,6 +40,8 @@ from Entity.CameraInterface import CameraInterface
 import copy
 from Algorithm.ImageProc.ImageProcBase import ImageProcBase
 
+lock = threading.Lock()
+
 class ImageHandle:
     def __init__(self, image_flow=None):
         self.image_label = XLabel.XLabel()
@@ -61,10 +63,10 @@ class ImageHandle:
                         image = Common.qImage2Numpy(self.mImageFlow.mFrame.convertToFormat(QImage.Format_ARGB32), 4)
                         t = threading.Thread(target=ImageHandle.image_process_thread, args=(image, self))
                         t.start()
-                    if self.Image_Processing is not None:
-                        self.image_label.mImage = Common.numpy2QImage(self.Image_Processing) 
-                    else:
-                        self.image_label.mImage = self.mImageFlow.mFrame.copy()
+                        if self.Image_Processing is not None:
+                            self.image_label.mImage = Common.numpy2QImage(self.Image_Processing) 
+                        else:
+                            self.image_label.mImage = self.mImageFlow.mFrame.copy()
                 else:
                     self.image_label.mImage = self.mImageFlow.mFrame.copy()
         elif self.image_label.mImage:
@@ -72,9 +74,14 @@ class ImageHandle:
 
     @staticmethod
     def image_process_thread(image, obj):
-        for image_proc in obj.mProcessList:
-            obj.Image_Processing = image_proc.process(image)
+        try:
+            # lock.acquire(True)
+            for image_proc in obj.mProcessList:
+                obj.Image_Processing = image_proc.process(image)
+        finally:
             obj.isProcessing = False
+            # lock.release()#释放
+            # pass
     
     def setImageFlow(self, flow):
         self.mImageFlow = flow 

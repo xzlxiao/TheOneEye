@@ -1,16 +1,18 @@
 from functools import partial
 
 import PyQt5
-from PyQt5.QtWidgets import QLabel, QFrame, QMenu, QAction, QGridLayout, QSizePolicy, QVBoxLayout, QListView
+from PyQt5.QtWidgets import QLabel, QFrame, QMenu, QAction, QDialog, QGridLayout, QSizePolicy, QVBoxLayout, QListView, QInputDialog
 from PyQt5 import QtCore, QtWidgets, QtGui, uic, QtMultimediaWidgets
 from PyQt5.QtGui import QContextMenuEvent, QPixmap, QResizeEvent
-from PyQt5.QtCore import pyqtSignal, QObject, QSize, QEvent
+from PyQt5.QtCore import pyqtSignal, QObject, QSize, QEvent, Qt
 from Control import MainController
 from Common.DebugPrint import myDebug, get_current_function_name
 from Entity.CameraInterface import CameraInterface
+from Entity.RobotEpuck import RobotEpuck
 from Views.CameraViewFrame import CameraViewFrame
 from Views.ImageProcViewFrame import ImageProcViewFrame
 from Views.ViewFrameBase import ViewFrameBase
+from Views.RobotFrame import RobotFrame
 from Control.CameraController import XCameraType
 import copy
 
@@ -35,12 +37,12 @@ class MultiViewFrame(QFrame):
         self.mFocusedView = None
         self.mLastViewList = []
         self.mViewList = []
-        self.mCameregister = []
-        self.mCameregister.append(self.on_add_camera0_view)
-        self.mCameregister.append(self.on_add_camera1_view)
-        self.mCameregister.append(self.on_add_camera2_view)
-        self.mCameregister.append(self.on_add_camera3_view)
-        self.mCameregister.append(self.on_add_camera4_view)
+        # self.mCameregister = []
+        # self.mCameregister.append(self.on_add_camera0_view)
+        # self.mCameregister.append(self.on_add_camera1_view)
+        # self.mCameregister.append(self.on_add_camera2_view)
+        # self.mCameregister.append(self.on_add_camera3_view)
+        # self.mCameregister.append(self.on_add_camera4_view)
 
     def mkQMenu(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -67,6 +69,10 @@ class MultiViewFrame(QFrame):
         add_image_proc_action.triggered.connect(self.slot_add_image_proc_view)
         menu.addAction(add_image_proc_action)
 
+        add_robot_action = QAction('添加机器人', menu)
+        add_robot_action.triggered.connect(self.slot_add_robot)
+        menu.addAction(add_robot_action)
+
         clear_views_action = QAction('清空视图', menu)
         clear_views_action.triggered.connect(self.slot_clearSubview)
         menu.addAction(clear_views_action)
@@ -79,6 +85,34 @@ class MultiViewFrame(QFrame):
         #     if event.button() == QtCore.Qt.RightButton:
         menu=self.mkQMenu()
         menu.exec_(event.globalPos())
+
+    def slot_add_robot(self):
+        dialog = QInputDialog(self)
+        dialog.setModal(True)
+        dialog.setStyleSheet("""
+        background-color: rgba(0, 0, 0, 200);
+        border:1px solid rgba(0, 200, 200, 150);
+        """)
+        dialog.setFixedSize(350,250) 
+        dialog.setWindowTitle('Set Input Flow for Improcessor')
+        dialog.setInputMode(QInputDialog.TextInput)
+        dialog.setLabelText('请输入…………（机器人的ip）')
+        dialog.setTextValue('192.168.0.128')
+        dialog.setOkButtonText('Ok')
+        dialog.setCancelButtonText('Cancel')
+        if dialog.exec_() == QDialog.Accepted:
+            ip = dialog.textValue()
+            robot_controller = MainController.getController().mRobotController
+            
+            robot_controller.addRobot(RobotEpuck)
+            robot = robot_controller.getRobot(-1)
+            robot.connect(ip)
+            view = RobotFrame(self)
+            view.setRobot(robot)
+            self.addSubview(view)
+        else:
+            print("dialog canceled")
+        dialog.show()
 
     def slot_add_image_proc_view(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -98,70 +132,70 @@ class MultiViewFrame(QFrame):
             self.addSubview(view)
             print('打开第%d个相机'%cam_id)
 
-    def on_add_camera0_view(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        camera_controller = MainController.getController().mCameraController
-        camera = camera_controller.getCamera(0)
-        if camera and camera.isOpen():
-            print('该相机已经打开')
-        else:
-            camera_controller.startCamera(0)
-            view = CameraViewFrame(self)
-            view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-            self.addSubview(view)
-            print('打开第0个相机')
+    # def on_add_camera0_view(self):
+    #     myDebug(self.__class__.__name__, get_current_function_name())
+    #     camera_controller = MainController.getController().mCameraController
+    #     camera = camera_controller.getCamera(0)
+    #     if camera and camera.isOpen():
+    #         print('该相机已经打开')
+    #     else:
+    #         camera_controller.startCamera(0)
+    #         view = CameraViewFrame(self)
+    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
+    #         self.addSubview(view)
+    #         print('打开第0个相机')
 
-    def on_add_camera1_view(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        camera_controller = MainController.getController().mCameraController
-        camera = camera_controller.getCamera(0)
-        if camera and camera.isOpen():
-            print('该相机已经打开')
-        else:
-            camera_controller.startCamera(1)
-            view = CameraViewFrame(self)
-            view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-            self.addSubview(view)
-            print('打开第1个相机')
+    # def on_add_camera1_view(self):
+    #     myDebug(self.__class__.__name__, get_current_function_name())
+    #     camera_controller = MainController.getController().mCameraController
+    #     camera = camera_controller.getCamera(0)
+    #     if camera and camera.isOpen():
+    #         print('该相机已经打开')
+    #     else:
+    #         camera_controller.startCamera(1)
+    #         view = CameraViewFrame(self)
+    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
+    #         self.addSubview(view)
+    #         print('打开第1个相机')
 
-    def on_add_camera2_view(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        camera_controller = MainController.getController().mCameraController
-        camera = camera_controller.getCamera(0)
-        if camera and camera.isOpen():
-            print('该相机已经打开')
-        else:
-            camera_controller.startCamera(2)
-            view = CameraViewFrame(self)
-            view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-            self.addSubview(view)
-            print('打开第2个相机')
+    # def on_add_camera2_view(self):
+    #     myDebug(self.__class__.__name__, get_current_function_name())
+    #     camera_controller = MainController.getController().mCameraController
+    #     camera = camera_controller.getCamera(0)
+    #     if camera and camera.isOpen():
+    #         print('该相机已经打开')
+    #     else:
+    #         camera_controller.startCamera(2)
+    #         view = CameraViewFrame(self)
+    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
+    #         self.addSubview(view)
+    #         print('打开第2个相机')
 
-    def on_add_camera3_view(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        camera_controller = MainController.getController().mCameraController
-        camera = camera_controller.getCamera(0)
-        if camera and camera.isOpen():
-            print('该相机已经打开')
-        else:
-            camera_controller.startCamera(3)
-            view = CameraViewFrame(self)
-            view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-            self.addSubview(view)
-            print('打开第3个相机')
+    # def on_add_camera3_view(self):
+    #     myDebug(self.__class__.__name__, get_current_function_name())
+    #     camera_controller = MainController.getController().mCameraController
+    #     camera = camera_controller.getCamera(0)
+    #     if camera and camera.isOpen():
+    #         print('该相机已经打开')
+    #     else:
+    #         camera_controller.startCamera(3)
+    #         view = CameraViewFrame(self)
+    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
+    #         self.addSubview(view)
+    #         print('打开第3个相机')
 
-    def on_add_camera4_view(self):
-        myDebug(self.__class__.__name__, get_current_function_name())
-        camera_controller = MainController.getController().mCameraController
-        camera = camera_controller.getCamera(0)
-        if camera and camera.isOpen():
-            print('该相机已经打开')
-        else:
-            camera_controller.startCamera(4)
-            view = CameraViewFrame(self)
-            view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-            self.addSubview(view)
-            print('打开第4个相机')
+    # def on_add_camera4_view(self):
+    #     myDebug(self.__class__.__name__, get_current_function_name())
+    #     camera_controller = MainController.getController().mCameraController
+    #     camera = camera_controller.getCamera(0)
+    #     if camera and camera.isOpen():
+    #         print('该相机已经打开')
+    #     else:
+    #         camera_controller.startCamera(4)
+    #         view = CameraViewFrame(self)
+    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
+    #         self.addSubview(view)
+    #         print('打开第4个相机')
 
     def reLayoutView(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -230,8 +264,11 @@ class MultiViewFrame(QFrame):
         view_ind = self.mViewList.index(view)
         input_flow = self.mViewList[view_ind].getInputFlow()
         camera_controller = MainController.getController().mCameraController
+        robot_controller = MainController.getController().mRobotController
         if type(input_flow) is CameraInterface:
             camera_controller.releaseCamera(input_flow.getID())
+        elif type(input_flow) is RobotEpuck:
+            robot_controller.releaseRobot(input_flow)
         self.mViewList.pop(self.mViewList.index(view))
         self.reLayoutView()
 
@@ -261,7 +298,11 @@ class MultiViewFrame(QFrame):
         myDebug(self.__class__.__name__, get_current_function_name())
         if self.mFocusedView:
             self.mFocusedView.deactive()
+            self.releaseKeyboard()
         self.mFocusedView = view
+        if type(self.mFocusedView) is RobotFrame:
+            self.grabKeyboard()
+        
         self.signalViewFocusChanged.emit()
         
 
@@ -270,3 +311,10 @@ class MultiViewFrame(QFrame):
         self.mBackgound.setGeometry(self.width()*0.5/3, self.height()*0.5/3, self.width()*2/3, self.height()*2/3)
         image = QPixmap("resource/images/earth.png")
         self.mBackgound.setPixmap(image.scaled(self.mBackgound.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+
+    def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
+        if self.mFocusedView:
+            if type(self.mFocusedView) is RobotFrame:
+                self.mFocusedView.on_key_press(a0)
+
+        # return super().keyPressEvent(a0)
