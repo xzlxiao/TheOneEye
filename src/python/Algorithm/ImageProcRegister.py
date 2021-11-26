@@ -7,7 +7,10 @@ ImageOtsusBinarization, \
 ImageForegroundExtraction, \
 ImageOpticalFlow, \
 ImageKmean8, \
-ImageFaceDetect
+ImageFaceDetect, \
+ImageQR2, \
+ImageYoloV3, \
+ImageYoloV3_low_res
 
 
 
@@ -25,6 +28,9 @@ class ImageProcRegister:
             ImageOpticalFlow.ImageOpticalFlow(),
             ImageKmean8.ImageKmean8(),
             ImageFaceDetect.ImageFaceDetect(),
+            ImageQR2.ImageQR2(),
+            ImageYoloV3.ImageYoloV3(),
+            ImageYoloV3_low_res.ImageYoloV3_low_res(),
         ]
 
     def getNames(self):

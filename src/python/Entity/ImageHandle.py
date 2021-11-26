@@ -67,6 +67,8 @@ class ImageHandle:
                             self.image_label.mImage = Common.numpy2QImage(self.Image_Processing) 
                         else:
                             self.image_label.mImage = self.mImageFlow.mFrame.copy()
+                    else:
+                        img = self.mImageFlow.mFrame.copy()
                 else:
                     self.image_label.mImage = self.mImageFlow.mFrame.copy()
         elif self.image_label.mImage:

@@ -26,6 +26,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from Views import MainWindow
 from Common.DebugPrint import myDebug, get_current_function_name
 from Control import CameraController, ViewController, CameraController, RobotController
+from Entity.CameraData import CameraData
 from Entity.ImageHandle import ImageHandle
 import time
 import sys
@@ -41,6 +42,7 @@ class MainController(QtCore.QObject):
         self.mViewController = ViewController.ViewController()
         self.mCameraController = CameraController.CameraController()
         self.mRobotController = RobotController.RobotController()
+        self.mCameraData = CameraData()
         self.mImageHandle = []
         self.initConnect()
         self.t1 = 0.0

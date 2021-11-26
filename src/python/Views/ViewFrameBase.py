@@ -117,7 +117,7 @@ class ViewFrameBase(QFrame):
         self.mOptionList.clear()
         self.mOptionFuncList.clear()
 
-    def defaultFunc(self):
+    def defaultFunc(self, ind:int):
         myDebug(self.__class__.__name__, get_current_function_name())
         print('defaultFunc')
 

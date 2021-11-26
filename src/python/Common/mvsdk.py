@@ -2,6 +2,7 @@
 import platform
 from ctypes import *
 from threading import local
+from Common.Common import Common
 
 # 回调函数类型
 CALLBACK_FUNC_TYPE = None
@@ -20,8 +21,16 @@ def _Init():
 	if is_win:
 		_sdk = windll.MVCAMSDK if is_x86 else windll.MVCAMSDK_X64
 		CALLBACK_FUNC_TYPE = WINFUNCTYPE
-	else:
+	elif Common.is_Linux:
 		_sdk = cdll.LoadLibrary("libMVSDK.so")
+		CALLBACK_FUNC_TYPE = CFUNCTYPE
+	# elif Common.is_darwin:
+	# 	_sdk = cdll.LoadLibrary("/usr/local/lib/libmvsdk.dylib")
+	# 	print(_sdk)
+	# 	CALLBACK_FUNC_TYPE = CFUNCTYPE
+	else:
+		_sdk = cdll.LoadLibrary("/usr/local/lib/libmvsdk.dylib")
+		print(_sdk)
 		CALLBACK_FUNC_TYPE = CFUNCTYPE
 
 

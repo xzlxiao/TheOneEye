@@ -25,9 +25,14 @@ from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 import numpy as np
 from PyQt5.QtGui import QImage
+import platform
 sys.path.append("../")
 
 class Common:
+    is_win = (platform.system() == "Windows")
+    is_x86 = (platform.architecture()[0] == '32bit')
+    is_darwin = (platform.architecture()[0] == 'Darwin')
+    is_Linux = (platform.system() == "Linux")
     def __init__(self):
         pass
 
@@ -48,7 +53,7 @@ class Common:
     
     @staticmethod
     def numpy2QImage(img: np.ndarray) -> QImage:
-        qimg = QImage(img.data, img.shape[1], img.shape[0], QImage.Format_ARGB32)
+        qimg = QImage(img.data.tobytes(), img.shape[1], img.shape[0], QImage.Format_ARGB32)
         return qimg
 
     @staticmethod

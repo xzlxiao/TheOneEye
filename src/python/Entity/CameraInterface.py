@@ -24,7 +24,6 @@ Updating Records:
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
-
 from Entity import CameraBase
 from PyQt5 import  QtWidgets,QtMultimediaWidgets
 from PyQt5.QtCore import QTimer, pyqtSignal

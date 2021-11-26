@@ -96,8 +96,8 @@ class MultiViewFrame(QFrame):
         dialog.setFixedSize(350,250) 
         dialog.setWindowTitle('Set Input Flow for Improcessor')
         dialog.setInputMode(QInputDialog.TextInput)
-        dialog.setLabelText('请输入…………（机器人的ip）')
-        dialog.setTextValue('192.168.0.128')
+        dialog.setLabelText('请输入……（机器人的ip）')
+        dialog.setTextValue('192.168.3.5')
         dialog.setOkButtonText('Ok')
         dialog.setCancelButtonText('Cancel')
         if dialog.exec_() == QDialog.Accepted:
@@ -318,3 +318,7 @@ class MultiViewFrame(QFrame):
                 self.mFocusedView.on_key_press(a0)
 
         # return super().keyPressEvent(a0)
+
+
+def createInputDialog_robot():
+    pass

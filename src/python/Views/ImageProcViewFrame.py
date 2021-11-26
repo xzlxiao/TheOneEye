@@ -36,7 +36,7 @@ class ImageProcViewFrame(ImageProcViewBase):
         self.removeImageFlowInput()
         self.signalFocusedChanged.emit(self, True)
     
-    def addImageFlowFunc(self):
+    def addImageFlowFunc(self, ind:int):
         myDebug(self.__class__.__name__, get_current_function_name())
         input_flow_list = self.controller.getInputFlowList()
         items = [item.getName() for item in input_flow_list]

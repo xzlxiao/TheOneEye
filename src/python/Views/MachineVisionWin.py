@@ -106,7 +106,7 @@ class MachineVisionWin(WinBase.WinBase):
     def on_clicked_list(self, qModelIndex):
         myDebug(self.__class__.__name__, get_current_function_name())
         if self.mFrameViewArea.mFocusedView:
-            self.mFrameViewArea.mFocusedView.mOptionFuncList[qModelIndex.row()]()
+            self.mFrameViewArea.mFocusedView.mOptionFuncList[qModelIndex.row()](qModelIndex.row())
 
     def resizeEvent(self, e: QResizeEvent):
         super().resizeEvent(e)

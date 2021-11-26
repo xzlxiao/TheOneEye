@@ -32,6 +32,7 @@ from PyQt5.QtGui import QMovie, QResizeEvent
 from PyQt5.QtMultimedia import QCameraInfo
 from PyQt5.QtCore import pyqtSignal, QObject, QEvent
 from Entity.CameraInterface import CameraInterface
+import os
 try: 
     import Common.mvsdk as mvsdk
 except:
@@ -41,6 +42,15 @@ import copy
 # from Entity.CameraHandle import CameraHandle
 import time
 import threading
+from Algorithm.yolo.models.experimental import attempt_load
+from Algorithm.yolo.utils.torch_utils import select_device
+import random
+import platform
+if platform.system() == 'Darwin':
+    YOLO_WEIGHTS = '/Users/data/yolov3.pt'
+else:
+    YOLO_WEIGHTS = '/home/data/yolov3.pt'
+
 
 lock = threading.Lock()
 class XCameraType:
@@ -61,6 +71,15 @@ class CameraController(QObject):
         # self.mCameraHandledImage = {}
         self.mCameraAvailable = []
         self.mCameraNum = 0
+        if os.path.exists(YOLO_WEIGHTS):
+            device = select_device()
+            self.mModelYolo = attempt_load(YOLO_WEIGHTS, map_location=device)
+            # Get names and colors
+            names = self.mModelYolo.module.names if hasattr(self.mModelYolo, 'module') else self.mModelYolo.names
+            self.mModelYoloColors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+        else: 
+            self.mModelYolo = None
+            self.mModelYoloColors = None
 
     def run(self):
         # myDebug(self.__class__.__name__, get_current_function_name())

@@ -1,6 +1,8 @@
 # TheOneEye
 ![](resource/images/EyeOfSauron.jpeg)  
-It's designed for machine vison testing tasks.
+It's designed for machine vision testing tasks.
+
+![](resource/file_res/TOE.gif)
 
 ## evironment setup
 - sudo apt install libqt5multimedia5-plugins
@@ -18,3 +20,5 @@ python3 main.py
 cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
 ```
 
+## 备注
+- 项目文档正在完善中……

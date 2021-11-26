@@ -10,8 +10,11 @@ class RobotBase(QWidget):
     def __init__(self, parent) -> None:
         super().__init__(parent=parent)
         self.mId = -1
-        self.mPos = np.array([0, 0, 0, 0, 0, 0], dtype=np.float32)
+        self.mPos = np.array([0, 0, 0], dtype=np.float32)
+        self.mOrientation = np.zeros((3, 3), dtype=np.float)
         self.mTarget = np.array(self.mPos, dtype=np.float32)
+        self.mTargetOrientation = np.array(self.mOrientation, dtype=np.float)
+        
         self.mColor = 'red'
         self.mShape = 'circle_line'
         self.mRadius = 7
@@ -25,7 +28,11 @@ class RobotBase(QWidget):
         self.mAx = None
 
     def setTarget(self, target):
-        self.mTarget = np.array(target, dtype=np.float32)
+        '''
+            target: 1 x 6, x y z rx ry rz
+        '''
+        self.mTarget = np.array(target[0:3], dtype=np.float32)
+        
 
     def setColor(self, color=(255, 0, 0)):
         self.mColor = color

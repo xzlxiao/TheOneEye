@@ -7,9 +7,12 @@ from Common.DebugPrint import myDebug, get_current_function_name
 from Views.ViewFrameBase import ViewFrameBase
 from Views.XLabel import XLabel
 from Entity.ImageHandle import ImageHandle
+
 from Algorithm.ImageProcRegister import getImageProcRegister
 from Algorithm.ImageProc.ImageProcBase import ImageProcBase
 import PyQt5
+
+from functools import partial
 
 class ImageProcViewBase(ViewFrameBase):
     def __init__(self, *args):
@@ -40,7 +43,7 @@ class ImageProcViewBase(ViewFrameBase):
         menu=self.mkQMenu()
         menu.exec_(event.globalPos())
 
-    def addImageProcFunc(self):
+    def addImageProcFunc(self, ind:int):
         myDebug(self.__class__.__name__, get_current_function_name())
         register = getImageProcRegister()
         items = register.getNames()
@@ -53,11 +56,12 @@ class ImageProcViewBase(ViewFrameBase):
         dialog.setFixedSize(350,250)
         dialog.setWindowTitle('Set Input Flow for Improcessor')
         dialog.setComboBoxItems(items)
-        dialog.textValueSelected.connect(lambda x: self._addImageProc(x, register[dialog.findChild(QComboBox).currentIndex()]) if dialog.findChild(QComboBox).currentIndex() >= 0 else None)
+        dialog.textValueSelected.connect(lambda: self._addImageProc(ind, register[dialog.findChild(QComboBox).currentIndex()]) if dialog.findChild(QComboBox).currentIndex() >= 0 else None)
+        # dialog.textValueSelected.connect(partial(self._addImageProc, ind, register[dialog.findChild(QComboBox).currentIndex()]))
         dialog.show()
 
     def _addImageProc(self, ind:int, algori:ImageProcBase):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mImageHandle.addImageProcess(algori)
-        self.insertOptionList(algori.Name, self.defaultFunc, 1)
+        self.insertOptionList(algori.Name, self.defaultFunc, ind)
         self.signalFocusedChanged.emit(self, True)
