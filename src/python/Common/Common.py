@@ -26,6 +26,7 @@ import sys
 import numpy as np
 from PyQt5.QtGui import QImage
 import platform
+from datetime import datetime
 sys.path.append("../")
 
 class Common:
@@ -38,7 +39,9 @@ class Common:
 
     @staticmethod
     def getTime() -> str:
-        pass
+        now = datetime.now()
+        date_time = now.strftime("%Y-%m-%d, %H:%M:%S:%f")
+        return date_time
 
     @staticmethod
     def getSimilarity(A: np.ndarray, B: np.ndarray) -> bool:

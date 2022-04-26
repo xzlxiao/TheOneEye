@@ -37,6 +37,8 @@ class MultiViewFrame(QFrame):
         self.mFocusedView = None
         self.mLastViewList = []
         self.mViewList = []
+        self.isViewMaximizedStateChanged = False
+        self.mMaximizedView = None
         # self.mCameregister = []
         # self.mCameregister.append(self.on_add_camera0_view)
         # self.mCameregister.append(self.on_add_camera1_view)
@@ -197,52 +199,91 @@ class MultiViewFrame(QFrame):
     #         self.addSubview(view)
     #         print('打开第4个相机')
 
+    def removeView(self, view):
+        """
+        将子视图从窗口中移除，不要调用removeWidget
+
+        Args:
+            view (_type_): 子视图
+        """
+        view.hide()
+        self.mMainLayout.removeWidget(view)
+
+    def addView(self, view, row, col):
+        """
+        窗口中添加子视图，不要调用addWidget
+
+        Args:
+            view (_type_): 子视图
+            row (_type_): 子视图在窗口中排列的行号
+            col (_type_): 子视图在窗口中排列的列号
+        """
+        view.show()
+        self.mMainLayout.addWidget(view, row, col)
+
+    def _multiLayout(self):
+        if len(self.mViewList) == 1:
+            for widget in self.mLastViewList:
+                self.removeView(widget)
+            for widget in self.mViewList:
+                self.addView(widget, 0, 0)
+        elif len(self.mViewList) <= 4:
+            for widget in self.mLastViewList:
+                self.removeView(widget)
+            for ind, widget in enumerate(self.mViewList):
+                row = ind // 2
+                col = ind % 2
+                self.addView(widget, row, col)
+        elif len(self.mViewList) <= 9:
+            for widget in self.mLastViewList:
+                self.removeView(widget)
+            for ind, widget in enumerate(self.mViewList):
+                row = ind // 3
+                col = ind % 3
+                self.addView(widget, row, col)
+        elif len(self.mViewList) <= 16:
+            for widget in self.mLastViewList:
+                self.removeView(widget)
+            for ind, widget in enumerate(self.mViewList):
+                row = ind // 4
+                col = ind % 4
+                self.addView(widget, row, col)
+        elif len(self.mViewList) <= 25:
+            for widget in self.mLastViewList:
+                self.removeView(widget)
+            for ind, widget in enumerate(self.mViewList):
+                row = ind // 5
+                col = ind % 5
+                self.addView(widget, row, col)
+        elif len(self.mViewList) <= 36:
+            for widget in self.mLastViewList:
+                self.removeView(widget)
+            for ind, widget in enumerate(self.mViewList):
+                row = ind // 6
+                col = ind % 6
+                self.addView(widget, row, col)
+                
     def reLayoutView(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         """
         mViewList重排
         """
         # print('test')
-        if len(self.mViewList) == 1:
-            for widget in self.mLastViewList:
-                self.mMainLayout.removeWidget(widget)
-            for widget in self.mViewList:
-                self.mMainLayout.addWidget(widget, 0, 0, 1, 1)
-        elif len(self.mViewList) <= 4:
-            for widget in self.mLastViewList:
-                self.mMainLayout.removeWidget(widget)
-            for ind, widget in enumerate(self.mViewList):
-                row = ind // 2
-                col = ind % 2
-                self.mMainLayout.addWidget(widget, row, col, 1, 1)
-        elif len(self.mViewList) <= 9:
-            for widget in self.mLastViewList:
-                self.mMainLayout.removeWidget(widget)
-            for ind, widget in enumerate(self.mViewList):
-                row = ind // 3
-                col = ind % 3
-                self.mMainLayout.addWidget(widget, row, col, 1, 1)
-        elif len(self.mViewList) <= 16:
-            for widget in self.mLastViewList:
-                self.mMainLayout.removeWidget(widget)
-            for ind, widget in enumerate(self.mViewList):
-                row = ind // 4
-                col = ind % 4
-                self.mMainLayout.addWidget(widget, row, col, 1, 1)
-        elif len(self.mViewList) <= 25:
-            for widget in self.mLastViewList:
-                self.mMainLayout.removeWidget(widget)
-            for ind, widget in enumerate(self.mViewList):
-                row = ind // 5
-                col = ind % 5
-                self.mMainLayout.addWidget(widget, row, col, 1, 1)
-        elif len(self.mViewList) <= 36:
-            for widget in self.mLastViewList:
-                self.mMainLayout.removeWidget(widget)
-            for ind, widget in enumerate(self.mViewList):
-                row = ind // 6
-                col = ind % 6
-                self.mMainLayout.addWidget(widget, row, col, 1, 1)
+        if self.isViewMaximizedStateChanged:
+            if self.mMaximizedView is None:
+                self._multiLayout()
+            else:
+                for widget in self.mLastViewList:
+                    self.removeView(widget)
+                self.addView(self.mMaximizedView, 0, 0)
+        else:
+            if self.mMaximizedView is None:
+                self.mLastViewList = self.mViewList.copy()
+                self._multiLayout()
+            else:
+                self.removeView(self.mMaximizedView)
+                self.addView(self.mMaximizedView, 0, 0)
+            
 
     def addSubview(self, view:ViewFrameBase):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -253,9 +294,31 @@ class MultiViewFrame(QFrame):
             view.signalFocusedChanged.connect(self.slot_subview_active_changed)
             view.signalClearViews.connect(self.slot_clearSubview)
             view.signalAddImageProcView.connect(self.slot_add_image_proc_view)
+            view.signalViewMaxmized.connect(self.slotMaximizeView)
+            view.signalViewMinimized.connect(self.slotMinimizeView)
             self.reLayoutView()
             
-        
+    def slotMaximizeView(self, view:ViewFrameBase):
+        if self.mMaximizedView is None:
+            self.isViewMaximizedStateChanged = True
+            self.mLastViewList = self.mViewList.copy()
+        else:
+            self.mLastViewList = []
+            self.mLastViewList.append(self.mMaximizedView)
+        self.setFocusedView(view)
+        self.mMaximizedView = view
+        self.reLayoutView()
+        self.isViewMaximizedStateChanged = False
+
+    def slotMinimizeView(self):
+        if self.mMaximizedView is not None:
+            self.isViewMaximizedStateChanged = True
+            self.mLastViewList = []
+            self.mLastViewList.append(self.mMaximizedView)
+        self.mMaximizedView = None
+        self.reLayoutView()
+        self.isViewMaximizedStateChanged = False
+
     def on_removeSubview(self, view):
         myDebug(self.__class__.__name__, get_current_function_name())
         if view.isFocused:

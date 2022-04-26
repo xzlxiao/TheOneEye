@@ -14,6 +14,8 @@ class ViewFrameBase(QFrame):
     signalFocusedChanged = pyqtSignal(QFrame, bool)
     signalClearViews = pyqtSignal()
     signalAddImageProcView = pyqtSignal()
+    signalViewMaxmized = pyqtSignal(QFrame)
+    signalViewMinimized = pyqtSignal()
     def __init__(self, *arg):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(ViewFrameBase, self).__init__(*arg)
@@ -23,6 +25,7 @@ class ViewFrameBase(QFrame):
         self.isFocused = False
         self.mOptionList = []
         self.mOptionFuncList = []
+        self.isViewMaximized = False
     
     def mouseReleaseEvent(self, a0: QtGui.QMouseEvent):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -52,6 +55,22 @@ class ViewFrameBase(QFrame):
     def on_clear_views(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.signalClearViews.emit()
+
+    def on_maximize_view(self):
+        """
+        视图最大化
+        """
+        if not self.isViewMaximized:
+            self.isViewMaximized = True
+            self.signalViewMaxmized.emit(self)
+
+    def on_minimize_view(self):
+        """
+        视图最小化
+        """
+        if self.isViewMaximized:
+            self.isViewMaximized = False
+            self.signalViewMinimized.emit()
 
     def mkQMenu(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -86,6 +105,14 @@ class ViewFrameBase(QFrame):
         # clear_view_action = QAction('清空视图', menu)
         # clear_view_action.triggered.connect(self.on_clear_views)
         menu.addAction(del_view_action)
+
+        maximize_view_action = QAction('最大化', menu)
+        maximize_view_action.triggered.connect(self.on_maximize_view)
+        menu.addAction(maximize_view_action)
+
+        minimize_view_action = QAction('最小化', menu)
+        minimize_view_action.triggered.connect(self.on_minimize_view)
+        menu.addAction(minimize_view_action)
         # menu.addAction(clear_view_action)
         return menu
 
