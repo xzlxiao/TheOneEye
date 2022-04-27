@@ -39,16 +39,10 @@ class MultiViewFrame(QFrame):
         self.mViewList = []
         self.isViewMaximizedStateChanged = False
         self.mMaximizedView = None
-        # self.mCameregister = []
-        # self.mCameregister.append(self.on_add_camera0_view)
-        # self.mCameregister.append(self.on_add_camera1_view)
-        # self.mCameregister.append(self.on_add_camera2_view)
-        # self.mCameregister.append(self.on_add_camera3_view)
-        # self.mCameregister.append(self.on_add_camera4_view)
 
     def mkQMenu(self):
         myDebug(self.__class__.__name__, get_current_function_name())
-        menu=QMenu(self)
+        menu = QMenu(self)
         menu.setStyleSheet("""
         color: rgb(0, 243, 255);
         background-color: rgba(255, 255, 255, 0); 
@@ -134,71 +128,6 @@ class MultiViewFrame(QFrame):
             self.addSubview(view)
             print('打开第%d个相机'%cam_id)
 
-    # def on_add_camera0_view(self):
-    #     myDebug(self.__class__.__name__, get_current_function_name())
-    #     camera_controller = MainController.getController().mCameraController
-    #     camera = camera_controller.getCamera(0)
-    #     if camera and camera.isOpen():
-    #         print('该相机已经打开')
-    #     else:
-    #         camera_controller.startCamera(0)
-    #         view = CameraViewFrame(self)
-    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-    #         self.addSubview(view)
-    #         print('打开第0个相机')
-
-    # def on_add_camera1_view(self):
-    #     myDebug(self.__class__.__name__, get_current_function_name())
-    #     camera_controller = MainController.getController().mCameraController
-    #     camera = camera_controller.getCamera(0)
-    #     if camera and camera.isOpen():
-    #         print('该相机已经打开')
-    #     else:
-    #         camera_controller.startCamera(1)
-    #         view = CameraViewFrame(self)
-    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-    #         self.addSubview(view)
-    #         print('打开第1个相机')
-
-    # def on_add_camera2_view(self):
-    #     myDebug(self.__class__.__name__, get_current_function_name())
-    #     camera_controller = MainController.getController().mCameraController
-    #     camera = camera_controller.getCamera(0)
-    #     if camera and camera.isOpen():
-    #         print('该相机已经打开')
-    #     else:
-    #         camera_controller.startCamera(2)
-    #         view = CameraViewFrame(self)
-    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-    #         self.addSubview(view)
-    #         print('打开第2个相机')
-
-    # def on_add_camera3_view(self):
-    #     myDebug(self.__class__.__name__, get_current_function_name())
-    #     camera_controller = MainController.getController().mCameraController
-    #     camera = camera_controller.getCamera(0)
-    #     if camera and camera.isOpen():
-    #         print('该相机已经打开')
-    #     else:
-    #         camera_controller.startCamera(3)
-    #         view = CameraViewFrame(self)
-    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-    #         self.addSubview(view)
-    #         print('打开第3个相机')
-
-    # def on_add_camera4_view(self):
-    #     myDebug(self.__class__.__name__, get_current_function_name())
-    #     camera_controller = MainController.getController().mCameraController
-    #     camera = camera_controller.getCamera(0)
-    #     if camera and camera.isOpen():
-    #         print('该相机已经打开')
-    #     else:
-    #         camera_controller.startCamera(4)
-    #         view = CameraViewFrame(self)
-    #         view.setCamera(camera_controller.mCameraList[len(camera_controller.mCameraList)-1])
-    #         self.addSubview(view)
-    #         print('打开第4个相机')
-
     def removeView(self, view):
         """
         将子视图从窗口中移除，不要调用removeWidget
@@ -222,6 +151,9 @@ class MultiViewFrame(QFrame):
         self.mMainLayout.addWidget(view, row, col)
 
     def _multiLayout(self):
+        """
+        根据子图数量对子图进行排布
+        """
         if len(self.mViewList) == 1:
             for widget in self.mLastViewList:
                 self.removeView(widget)
@@ -341,7 +273,7 @@ class MultiViewFrame(QFrame):
             self.setFocusedView(None)
         if value:
             self.setFocusedView(view)
-            self.mFocusedView.active()
+            # self.mFocusedView.active()
         else: 
             view.deactive()
 
@@ -363,6 +295,8 @@ class MultiViewFrame(QFrame):
             self.mFocusedView.deactive()
             self.releaseKeyboard()
         self.mFocusedView = view
+        if self.mFocusedView is not None:
+            self.mFocusedView.active()
         if type(self.mFocusedView) is RobotFrame:
             self.grabKeyboard()
         

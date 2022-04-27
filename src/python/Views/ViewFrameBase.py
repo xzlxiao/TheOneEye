@@ -113,8 +113,12 @@ class ViewFrameBase(QFrame):
         minimize_view_action = QAction('最小化', menu)
         minimize_view_action.triggered.connect(self.on_minimize_view)
         menu.addAction(minimize_view_action)
+
+        
         # menu.addAction(clear_view_action)
         return menu
+
+    
 
     def slot_add_image_proc_view(self):
         myDebug(self.__class__.__name__, get_current_function_name())

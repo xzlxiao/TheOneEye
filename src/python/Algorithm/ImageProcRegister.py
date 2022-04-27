@@ -10,7 +10,8 @@ ImageKmean8, \
 ImageFaceDetect, \
 ImageQR2, \
 ImageYoloV3, \
-ImageYoloV3_low_res
+ImageYoloV3_low_res, \
+ImageSave
 
 
 
@@ -31,6 +32,7 @@ class ImageProcRegister:
             ImageQR2.ImageQR2(),
             ImageYoloV3.ImageYoloV3(),
             ImageYoloV3_low_res.ImageYoloV3_low_res(),
+            ImageSave.ImageSave(), 
         ]
 
     def getNames(self):

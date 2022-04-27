@@ -42,7 +42,7 @@ class MainController(QtCore.QObject):
         self.mViewController = ViewController.ViewController()
         self.mCameraController = CameraController.CameraController()
         self.mRobotController = RobotController.RobotController()
-        self.mCameraData = CameraData()
+        self.mCameraData = CameraData()         # 公共变量资源
         self.mImageHandle = []
         self.initConnect()
         self.t1 = 0.0

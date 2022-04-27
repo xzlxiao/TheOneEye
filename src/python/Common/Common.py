@@ -21,6 +21,7 @@ Dependencies：
 Updating Records:
 2021-01-22 09:38:15 xzl
 """
+import os
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 import numpy as np
@@ -36,11 +37,25 @@ class Common:
     is_Linux = (platform.system() == "Linux")
     def __init__(self):
         pass
+    
+    @staticmethod
+    def mkdir(dir):
+        if os.path.exists(dir):
+            return False
+        else:
+            os.makedirs(dir)
+            return True
 
     @staticmethod
     def getTime() -> str:
         now = datetime.now()
         date_time = now.strftime("%Y-%m-%d, %H:%M:%S:%f")
+        return date_time
+
+    @staticmethod
+    def getDirTime() -> str:
+        now = datetime.now()
+        date_time = now.strftime("%Y-%m-%d_%H-%M-%S-%f")
         return date_time
 
     @staticmethod
