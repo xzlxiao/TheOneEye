@@ -11,7 +11,8 @@ ImageFaceDetect, \
 ImageQR2, \
 ImageYoloV3, \
 ImageYoloV3_low_res, \
-ImageSave
+ImageSave, \
+Image2Video
 
 
 
@@ -33,6 +34,7 @@ class ImageProcRegister:
             ImageYoloV3.ImageYoloV3(),
             ImageYoloV3_low_res.ImageYoloV3_low_res(),
             ImageSave.ImageSave(), 
+            Image2Video.Image2Video(),
         ]
 
     def getNames(self):

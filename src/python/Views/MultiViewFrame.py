@@ -65,7 +65,11 @@ class MultiViewFrame(QFrame):
         add_image_proc_action.triggered.connect(self.slot_add_image_proc_view)
         menu.addAction(add_image_proc_action)
 
-        add_robot_action = QAction('添加机器人', menu)
+        add_multi_robots_action = QAction('添加多机器人控制器', menu)
+        add_multi_robots_action.triggered.connect(self.slot_add_multi_robots_view)
+        menu.addAction(add_multi_robots_action)
+
+        add_robot_action = QAction('添加单个机器人', menu)
         add_robot_action.triggered.connect(self.slot_add_robot)
         menu.addAction(add_robot_action)
 
@@ -81,6 +85,19 @@ class MultiViewFrame(QFrame):
         #     if event.button() == QtCore.Qt.RightButton:
         menu=self.mkQMenu()
         menu.exec_(event.globalPos())
+    def slot_add_multi_robots_view(self):
+        dialog = QInputDialog(self)
+        dialog.setModal(True)
+        dialog.setStyleSheet("""
+        background-color: rgba(0, 0, 0, 200);
+        border:1px solid rgba(0, 200, 200, 150);
+        """)
+        dialog.setFixedSize(350,250) 
+        dialog.setWindowTitle('Set config file path')
+        dialog.setInputMode(QInputDialog.TextInput)
+        dialog.setLabelText('配置文件地址')
+        dialog.setTextValue('./multi_robot_config.conf')
+        
 
     def slot_add_robot(self):
         dialog = QInputDialog(self)

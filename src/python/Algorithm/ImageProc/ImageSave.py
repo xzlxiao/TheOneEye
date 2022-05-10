@@ -18,8 +18,8 @@ class ImageSave(ImageProcBase):
         ret = super().process(image)
         # print(self.channels(image))
         # ret = copy.deepcopy(image)
-        TURN = cv2.cvtColor(ret, cv2.COLOR_BGR2RGB)
-        save_image = Image.fromarray(TURN)
+        im = cv2.cvtColor(ret, cv2.COLOR_BGR2RGB)
+        save_image = Image.fromarray(im)
         saveDir = self.mImageSaveDir
         save_name = saveDir + '/image_' + Common.getDirTime() + '.png'
         Common.mkdir(saveDir)

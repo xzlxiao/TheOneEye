@@ -26,8 +26,9 @@ cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
 ## 项目进度
 - 完成图像保存模块
 - 解决多处理图像保存时地址错误的问题
+- 视频保存模块
+  - 使用sk-video替代opencv-python作为视频保存接口
 
 ## todo list
-- 视频保存模块
 - 更多的算法插件
 - 解决旋转图像无法保存的问题

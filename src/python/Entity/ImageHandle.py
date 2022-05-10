@@ -119,7 +119,7 @@ class ImageHandle(QObject):
         self.mImageFlow = flow 
 
     def addImageProcess(self, im_proc: ImageProcBase, index=-1):
-        im_proc.mImageSaveDir = self._imageSaveDir
+        im_proc.setImageSaveDir(self._imageSaveDir)
         if index == -1 or len(self.mProcessList)==0:
             self.mProcessList.append(im_proc)
         elif index < len(self.mProcessList) and index >= 0:

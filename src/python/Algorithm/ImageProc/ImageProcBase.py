@@ -1,12 +1,16 @@
 import cv2 
 import numpy as np
 import copy
+from PyQt5.QtCore import QTimer, QThread, QObject
 
 class ImageProcBase:
     def __init__(self) -> None:
         self.Name = 'ImageProcBase'
         self.mLastImage = None
         self.mImageSaveDir = ""
+
+    def setImageSaveDir(self, dir):
+        self.mImageSaveDir = dir
 
     def channels(self, image):
         if image.ndim == 2:		#2维度表示长宽
@@ -18,7 +22,7 @@ class ImageProcBase:
         return n_channels
 
     def process(self, image: np.ndarray) -> np.ndarray:
-        return image
+        return image.copy()
 
     def getConfig(self):
         return None
