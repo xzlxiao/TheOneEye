@@ -19,9 +19,6 @@ class ImageProcViewBase(ViewFrameBase):
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(ImageProcViewBase, self).__init__(*args)
-        self.mLayout = QGridLayout(self)
-        self.mLayout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.mLayout)
         self.mActiveBorderStyle = 'border:1px solid rgba(200, 50, 50, 255);'
         self.mUnactiveBorderStyle = 'border:1px solid rgba(200, 200, 200, 150);'
         self.deactive()

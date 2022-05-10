@@ -1,6 +1,5 @@
 PyQt5>=5.6
 opencv-python>=3.0
-
 opencv-contrib-python
 pyzbar
 numpy

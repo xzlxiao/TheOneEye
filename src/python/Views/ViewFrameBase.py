@@ -26,6 +26,9 @@ class ViewFrameBase(QFrame):
         self.mOptionList = []
         self.mOptionFuncList = []
         self.isViewMaximized = False
+        self.mLayout = QGridLayout(self)
+        self.mLayout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.mLayout)
     
     def mouseReleaseEvent(self, a0: QtGui.QMouseEvent):
         myDebug(self.__class__.__name__, get_current_function_name())

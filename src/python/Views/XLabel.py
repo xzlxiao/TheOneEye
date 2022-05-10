@@ -40,7 +40,7 @@ class XLabel(QLabel):
         super(XLabel, self).__init__(*args)
         self.mImage = None
         self.mBackImage = QPixmap()
-        self.mBackImage.load("resource/images/EyeOfSauron.jpeg")
+        # self.mBackImage.load("resource/images/EyeOfSauron.jpeg")
         if platform.system() == 'Darwin':
             self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         else:

@@ -28,6 +28,7 @@ from Common.DebugPrint import myDebug, get_current_function_name
 from Control import CameraController, ViewController, CameraController, RobotController
 from Entity.CameraData import CameraData
 from Entity.ImageHandle import ImageHandle
+from Entity.DataHandle import DataHandle
 import time
 import sys
 sys.path.append("../")
@@ -44,6 +45,7 @@ class MainController(QtCore.QObject):
         self.mRobotController = RobotController.RobotController()
         self.mCameraData = CameraData()         # 公共变量资源
         self.mImageHandle = []
+        self.mDataHandle = []
         self.initConnect()
         self.t1 = 0.0
 
@@ -69,6 +71,9 @@ class MainController(QtCore.QObject):
         for handle in self.mImageHandle:
             # t1 = time.time()
             handle.image_process()
+        
+        for handle in self.mDataHandle:
+            handle.data_process()
         # t2 = time.time()
         # print('计算时间：', t2-t1)
 
@@ -78,6 +83,12 @@ class MainController(QtCore.QObject):
 
     def removeImageHandle(self, image_handle: ImageHandle):
         self.mImageHandle.remove(image_handle)
+
+    def addDataHandle(self, data_handle: DataHandle):
+        self.mDataHandle.append(data_handle)
+
+    def removeDataHandle(self, data_handle: DataHandle):
+        self.mDataHandle.remove(data_handle)
 
     def getInputFlowList(self):
         camera_list = self.mCameraController.getCameraList()

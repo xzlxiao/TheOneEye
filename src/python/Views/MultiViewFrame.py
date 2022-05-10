@@ -13,6 +13,7 @@ from Views.CameraViewFrame import CameraViewFrame
 from Views.ImageProcViewFrame import ImageProcViewFrame
 from Views.ViewFrameBase import ViewFrameBase
 from Views.RobotFrame import RobotFrame
+from Views.MultiRobotControlFrame import MultiRobotControlFrame
 from Control.CameraController import XCameraType
 import copy
 
@@ -97,7 +98,16 @@ class MultiViewFrame(QFrame):
         dialog.setInputMode(QInputDialog.TextInput)
         dialog.setLabelText('配置文件地址')
         dialog.setTextValue('./multi_robot_config.conf')
-        
+        dialog.setOkButtonText('Ok')
+        dialog.setCancelButtonText('Cancel')
+        if dialog.exec_() == QDialog.Accepted:
+            config_path = dialog.textValue()
+            view = MultiRobotControlFrame(self)
+            view.loadConfigFile(config_path)
+            self.addSubview(view)
+        else:
+            print("dialog canceled")
+        dialog.show()
 
     def slot_add_robot(self):
         dialog = QInputDialog(self)

@@ -39,15 +39,17 @@ from Views import XLabel
 from Entity.CameraInterface import CameraInterface
 import copy
 from Algorithm.ImageProc.ImageProcBase import ImageProcBase
+from Entity.HandleBase import HandleBase
 
 lock = threading.Lock()
 
-class ImageHandle(QObject):
+class ImageHandle(HandleBase):
     _count = 0
     def __init__(self, image_flow=None):
+        super().__init__()
         self.id = ImageHandle._count
         ImageHandle._count += 1
-        self.image_label = XLabel.XLabel()
+        self.image_label.mBackImage.load("resource/images/EyeOfSauron.jpeg")
         self.image_label.hide()
         self.mProcessList = []     # 函数指针列表 func(image_src)->image_dst
         self.mImageFlow = image_flow
