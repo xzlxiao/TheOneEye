@@ -11,9 +11,9 @@ class CameraViewFrame(ViewFrameBase):
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(CameraViewFrame, self).__init__(*args)
-        self.mLayout = QVBoxLayout(self)
-        self.mLayout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.mLayout)
+        # self.mLayout = QVBoxLayout(self)
+        # self.mLayout.setContentsMargins(0, 0, 0, 0)
+        # self.setLayout(self.mLayout)
         self.mCameraNameLabel = QLabel(self)
         self.mCameraNameLabel.setFixedHeight(20)
         self.mCameraNameLabel.setStyleSheet("color: rgb(255, 0, 0);border:0px solid rgba(100, 100, 100, 0);")
