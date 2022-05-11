@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLabel, QFrame, QMenu, QAction, QGridLayout, QInputDialog, QComboBox, QDialog
+from PyQt5.QtWidgets import QLabel, QFrame, QMenu, QAction, QGridLayout, QMessageBox, QInputDialog, QComboBox, QDialog
 from PyQt5 import QtCore, QtWidgets, QtGui, uic, QtMultimediaWidgets
 from PyQt5.QtGui import QContextMenuEvent, QPixmap, QResizeEvent
 from PyQt5.QtCore import pyqtSignal, QObject, QSize, QEvent, Qt
@@ -16,6 +16,7 @@ import PyQt5
 from Entity.DataHandle import DataHandle
 from functools import partial
 import json
+from Views import MessageShow
 
 class MultiRobotControlFrame(ViewFrameBase):
     def __init__(self, *arg):
@@ -41,15 +42,18 @@ class MultiRobotControlFrame(ViewFrameBase):
 
     def addRobot(self, robot_data: tuple):
         myDebug(self.__class__.__name__, get_current_function_name())
-        robot_type = robot_data["type"]
-        if robot_type == "RobotEpuck":
-            print("add RobotEpuck")
-            pass 
-        elif robot_type == "RobotSimEpuck":
-            print("add RobotSimEpuck")
-            pass 
+        if "type" not in robot_data.keys():
+            MessageShow.warn("Warning", "The 'type' key is missing")
         else:
-            print("robot type is wrong. ")
+            robot_type = robot_data["type"]
+            if robot_type == "RobotEpuck":
+                print("add RobotEpuck")
+                pass 
+            elif robot_type == "RobotSimEpuck":
+                print("add RobotSimEpuck")
+                pass 
+            else:
+                print("robot type is wrong. ")
 
     def setRobotPolicy(self, policy: str):
         # if policy == "Robot"
