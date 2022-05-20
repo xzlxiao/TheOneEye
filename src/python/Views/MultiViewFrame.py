@@ -9,6 +9,8 @@ from Control import MainController
 from Common.DebugPrint import myDebug, get_current_function_name
 from Entity.CameraInterface import CameraInterface
 from Entity.RobotEpuck import RobotEpuck
+from Entity.RobotVEpuck import RobotVEpuck
+from Entity.RobotTwinsEpuck import RobotTwinsEpuck
 from Views.CameraViewFrame import CameraViewFrame
 from Views.ImageProcViewFrame import ImageProcViewFrame
 from Views.ViewFrameBase import ViewFrameBase
@@ -70,9 +72,17 @@ class MultiViewFrame(QFrame):
         add_multi_robots_action.triggered.connect(self.slot_add_multi_robots_view)
         menu.addAction(add_multi_robots_action)
 
-        add_robot_action = QAction('添加单个机器人', menu)
-        add_robot_action.triggered.connect(self.slot_add_robot)
-        menu.addAction(add_robot_action)
+        add_EPuck_action = QAction('添加单个EPuck', menu)
+        add_EPuck_action.triggered.connect(self.slot_add_EPuck)
+        menu.addAction(add_EPuck_action)
+
+        add_TPuck_action = QAction('添加单个TPuck', menu)
+        add_TPuck_action.triggered.connect(self.slot_add_TPuck)
+        menu.addAction(add_TPuck_action)
+
+        add_VPuck_action = QAction('添加单个VPuck', menu)
+        add_VPuck_action.triggered.connect(self.slot_add_VPuck)
+        menu.addAction(add_VPuck_action)
 
         clear_views_action = QAction('清空视图', menu)
         clear_views_action.triggered.connect(self.slot_clearSubview)
@@ -86,6 +96,7 @@ class MultiViewFrame(QFrame):
         #     if event.button() == QtCore.Qt.RightButton:
         menu=self.mkQMenu()
         menu.exec_(event.globalPos())
+
     def slot_add_multi_robots_view(self):
         dialog = QInputDialog(self)
         dialog.setModal(True)
@@ -109,7 +120,40 @@ class MultiViewFrame(QFrame):
             print("dialog canceled")
         dialog.show()
 
-    def slot_add_robot(self):
+    def slot_add_VPuck(self):
+        dialog = QInputDialog(self)
+        dialog.setModal(True)
+        dialog.setStyleSheet("""
+        background-color: rgba(0, 0, 0, 200);
+        border:1px solid rgba(0, 200, 200, 150);
+        """)
+        dialog.setFixedSize(350,250) 
+        dialog.setWindowTitle('Set Input Flow for Improcessor')
+        dialog.setInputMode(QInputDialog.TextInput)
+        dialog.setLabelText('请输入……（机器人的ip:port）')
+        dialog.setTextValue('127.0.0.1:8881')
+        dialog.setOkButtonText('Ok')
+        dialog.setCancelButtonText('Cancel')
+        if dialog.exec_() == QDialog.Accepted:
+            dir = dialog.textValue()
+            robot_controller = MainController.getController().mRobotController
+            
+            robot_controller.addRobot(RobotVEpuck)
+            robot = robot_controller.getRobot(-1)
+            # robot:RobotVEpuck
+            robot.setParent(self)
+            robot.connect(dir)
+            view = RobotFrame(self)
+            view.setRobot(robot)
+            self.addSubview(view)
+        else:
+            print("dialog canceled")
+        dialog.show()
+
+    def slot_add_TPuck(self):
+        pass
+
+    def slot_add_EPuck(self):
         dialog = QInputDialog(self)
         dialog.setModal(True)
         dialog.setStyleSheet("""

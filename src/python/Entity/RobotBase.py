@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QWidget
 class RobotBase(QWidget):
     def __init__(self, parent) -> None:
         super().__init__(parent=parent)
+        self.mRobotType = "RobotBase"
         self.mId = -1
         self.mPos = np.array([0, 0, 0], dtype=np.float32)
         self.mOrientation = np.zeros((3, 3), dtype=np.float)

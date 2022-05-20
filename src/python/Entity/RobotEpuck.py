@@ -34,6 +34,7 @@ class RobotEpuck(RobotBase):
     def __init__(self, parent, population, pos=np.array((0, 0, 0), dtype=np.float), orientation = np.zeros((3,3), dtype=np.float)) -> None:
         myDebug(self.__class__.__name__, get_current_function_name())
         super().__init__(parent)
+        self.mRobotType = "RobotEpuck"
         self.mState = RobotControlMode.PolicyControl
         self.mCamera = CameraEPuck(self)
         self.mPopulation = population

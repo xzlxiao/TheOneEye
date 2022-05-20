@@ -53,5 +53,5 @@ class RobotController(QWidget):
         self.update()
         for robot in self.mRobotList:
             robot.update()
-            print(robot.mPos)
-            print(robot.mRobotEulerAngle)
+            # print(robot.mPos)
+            # print(robot.mRobotEulerAngle)
