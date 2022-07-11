@@ -5,28 +5,28 @@ from Control import MainController
 import math
 
 
-def qrDectbyZbar(frame):
-    h1, w1 = frame.shape[0], frame.shape[1]
+# def qrDectbyZbar(frame):
+#     h1, w1 = frame.shape[0], frame.shape[1]
 
-    texts = pyzbar.decode(frame)
-    for text in texts:
-        textdate = text.data.decode('utf-8')
-        (x, y, w, h) = text.rect  # 获取二维码的外接矩形顶点坐标
+#     texts = pyzbar.decode(frame)
+#     for text in texts:
+#         textdate = text.data.decode('utf-8')
+#         (x, y, w, h) = text.rect  # 获取二维码的外接矩形顶点坐标
 
-        # 二维码中心坐标
-        cx = int(x + w / 2)
-        cy = int(y + h / 2)
-        cv2.circle(frame, (cx, cy), 2, (0, 255, 0), 8)  # 做出中心坐标
-        # 画出画面中心与二维码中心的连接线
-        cv2.line(frame, (cx, cy), (int(w1 / 2), int(h1 / 2)), (255, 0, 0), 10)
-        # 二维码最小矩形
-        try:
-            cv2.line(frame, text.polygon[0], text.polygon[1], (255, 0, 0), 2)
-            cv2.line(frame, text.polygon[1], text.polygon[2], (255, 0, 0), 2)
-            cv2.line(frame, text.polygon[2], text.polygon[3], (255, 0, 0), 2)
-            cv2.line(frame, text.polygon[3], text.polygon[0], (255, 0, 0), 2)
-        except IndexError:
-            pass
+#         # 二维码中心坐标
+#         cx = int(x + w / 2)
+#         cy = int(y + h / 2)
+#         cv2.circle(frame, (cx, cy), 2, (0, 255, 0), 8)  # 做出中心坐标
+#         # 画出画面中心与二维码中心的连接线
+#         cv2.line(frame, (cx, cy), (int(w1 / 2), int(h1 / 2)), (255, 0, 0), 10)
+#         # 二维码最小矩形
+#         try:
+#             cv2.line(frame, text.polygon[0], text.polygon[1], (255, 0, 0), 2)
+#             cv2.line(frame, text.polygon[1], text.polygon[2], (255, 0, 0), 2)
+#             cv2.line(frame, text.polygon[2], text.polygon[3], (255, 0, 0), 2)
+#             cv2.line(frame, text.polygon[3], text.polygon[0], (255, 0, 0), 2)
+#         except IndexError:
+#             pass
 
 
 # mindvision camera, tested in 1920x1200
