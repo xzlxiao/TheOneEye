@@ -25,7 +25,8 @@ def qrDextbyArUco2(frame):
     h = frame.shape[0]
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100)
+    # aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100)
+    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
     parameters = cv2.aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
     angular = []

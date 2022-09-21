@@ -49,6 +49,7 @@ class RobotEpuck(RobotBase):
         self.mLineSpeed = 0.0
         self.mRotationSpeed = 0.0
         self.mAlpha = 0.0
+        self.mPreAlpha = 0.0
         self.mTheta = 0.0
         self.mBeta = 0.0
 
@@ -75,6 +76,9 @@ class RobotEpuck(RobotBase):
         self.mPolicy:RobotPolicyBase = None         # 机器人的决策，通过插件更改
 
         self.isGetLocationFromGlobal = True
+
+        self.nearDestination = False
+        self.toNextTarget = False   # if a robot has near the now target, it change the target value to the next target, to avoid speed down,
 
         # 参数
         self.MAX_SPEED = float(XSetting.getValue('Epuck/MAX_SPEED'))
@@ -111,10 +115,20 @@ class RobotEpuck(RobotBase):
     def setTarget(self, target):
         super().setTarget(target)
         self.mTargetOrientation[0, 0] 
-        if target[5] > 0:
-            self.mTargetEulerAngle = target[5]
+
+        # 旧代码
+        # if target[5] > 0:
+        #     self.mTargetEulerAngle = target[5]
+        # else:
+        #     self.mTargetEulerAngle = target[5]
+
+        # 黄吉修改代码 start
+        if target[5] > 180:  # if input in range [0, 360]
+            self.mTargetEulerAngle = -360 + target[5]
         else:
             self.mTargetEulerAngle = target[5]
+        # 黄吉修改代码 end
+
         self.mTargetEulerAngle = self.mTargetEulerAngle*math.pi/180
         sin_i = math.sin(self.mTargetEulerAngle)
         cos_i = math.cos(self.mTargetEulerAngle)
@@ -465,11 +479,21 @@ class RobotEpuck(RobotBase):
             self.setSelfPos(data)
         
     def setSelfPos(self, data):
-        self.mPos[:] = data[0:3]/1000
-        if data[5] > 0:
-            self.mRobotEulerAngle = -180 + data[5]
-        else:
-            self.mRobotEulerAngle = 180 + data[5]
+        # 旧代码
+        # self.mPos[:] = data[0:3]/1000
+        # if data[5] > 0:
+        #     self.mRobotEulerAngle = -180 + data[5]
+        # else:
+        #     self.mRobotEulerAngle = 180 + data[5]
+
+        # 黄吉修改代码 start
+        self.mRobotEulerAngle = - data[5] + 90
+        if self.mRobotEulerAngle > 180:
+            self.mRobotEulerAngle = self.mRobotEulerAngle - 360
+        elif self.mRobotEulerAngle < -180:
+            self.mRobotEulerAngle = self.mRobotEulerAngle + 360
+        # 黄吉修改代码 end
+
         self.mRobotEulerAngle = self.mRobotEulerAngle*math.pi/180
         sin_i = math.sin(self.mRobotEulerAngle)
         cos_i = math.cos(self.mRobotEulerAngle)
@@ -482,66 +506,146 @@ class RobotEpuck(RobotBase):
 
     def feedbackControl(self):
         self.mSpeedWheels = self.expectedWheelsSpeed()
-        speed1 = 0.0
-        speed2 = 0.0
-        if self.mSpeedWheels[0] > self.MAX_SPEED:
-            speed1 = self.MAX_SPEED
-        elif self.mSpeedWheels[0] < -self.MAX_SPEED:
-            speed1 = -self.MAX_SPEED
+
+        # 旧代码
+        # speed1 = 0.0
+        # speed2 = 0.0
+        # if self.mSpeedWheels[0] > self.MAX_SPEED:
+        #     speed1 = self.MAX_SPEED
+        # elif self.mSpeedWheels[0] < -self.MAX_SPEED:
+        #     speed1 = -self.MAX_SPEED
+        # else:
+        #     speed1 = self.mSpeedWheels[0]
+        # if self.mSpeedWheels[1] > self.MAX_SPEED:
+        #     speed2 = self.MAX_SPEED
+        # elif self.mSpeedWheels[1] < -self.MAX_SPEED:
+        #     speed2 = -self.MAX_SPEED
+        # else:
+        #     speed2 = self.mSpeedWheels[1]
+        
+        # 黄吉修改代码 start
+        if self.mSpeedWheels[0] >= self.mSpeedWheels[1]:  # 等幅值放大或者缩小
+            if self.mSpeedWheels[0] > self.MAX_SPEED:
+                speed1 = self.MAX_SPEED
+                if self.mSpeedWheels[1] < -self.MAX_SPEED:
+                    speed2 = -self.MAX_SPEED
+                else:
+                    speed2 = self.MAX_SPEED * self.mSpeedWheels[1] / self.mSpeedWheels[0]
+            elif self.mSpeedWheels[1] < -self.MAX_SPEED:
+                speed1 = -self.MAX_SPEED * self.mSpeedWheels[0] / self.mSpeedWheels[1]
+                speed2 = -self.MAX_SPEED
+            else:
+                speed1 = self.mSpeedWheels[0]
+                speed2 = self.mSpeedWheels[1]
         else:
-            speed1 = self.mSpeedWheels[0]
-        if self.mSpeedWheels[1] > self.MAX_SPEED:
-            speed2 = self.MAX_SPEED
-        elif self.mSpeedWheels[1] < -self.MAX_SPEED:
-            speed2 = -self.MAX_SPEED
-        else:
-            speed2 = self.mSpeedWheels[1]
-        # speed1 = self.mSpeedWheels[0]
-        # speed2 = self.mSpeedWheels[1]
+            if self.mSpeedWheels[1] > self.MAX_SPEED:
+                if self.mSpeedWheels[0] < -self.MAX_SPEED:
+                    speed1 = -self.MAX_SPEED
+                else:
+                    speed1 = self.MAX_SPEED * self.mSpeedWheels[0] / self.mSpeedWheels[1]
+                speed2 = self.MAX_SPEED
+            elif self.mSpeedWheels[0] < -self.MAX_SPEED:
+                speed2 = -self.MAX_SPEED * self.mSpeedWheels[1] / self.mSpeedWheels[0]
+                speed1 = -self.MAX_SPEED
+            else:
+                speed1 = self.mSpeedWheels[0]
+                speed2 = self.mSpeedWheels[1]
+
+        # 黄吉修改代码 end
         self.setMotorVelocity(speed1, speed2)
 
     def expectedWheelsSpeed(self) -> np.ndarray: 
         # 现将机器人自身坐标和角度从世界坐标系转换到目标坐标系下
         ret: np.ndarray = np.zeros((2), dtype=np.float)
         self.mTargetOrientation: np.ndarray
-        print()
-        print('(self.mPos - self.mTarget).T: ', self.mTarget - self.mPos)
-        print('self.mTargetOrientation.T: ', self.mTargetOrientation.T)
-        pos_t = np.matmul(self.mTargetOrientation.T, (self.mTarget - self.mPos)) 
-        ori_t = np.matmul(self.mTargetOrientation.T, self.mOrientation)
-        print('pos_t: ', pos_t)
-        print('ori_t: ', ori_t)
+        # print()
+        # print('(self.mPos - self.mTarget).T: ', self.mTarget - self.mPos)
+        # print('self.mTargetOrientation.T: ', self.mTargetOrientation.T)
+        # pos_t = np.matmul(self.mTargetOrientation.T, (self.mTarget - self.mPos)) 
+        # ori_t = np.matmul(self.mTargetOrientation.T, self.mOrientation)
+        # print('pos_t: ', pos_t)
+        # print('ori_t: ', ori_t)
+
+        pos_t = self.mTarget - self.mPos   # replaced
+        ori_t = self.mOrientation          # replaced
+
         self.mX_t = pos_t[0]
         self.mY_t = pos_t[1]
         # 计算反馈控制的输出线速度 \nu = k_{\rho}\rho
-        self.mLineSpeed = self.K_RHO * math.sqrt(math.pow(self.mX_t, 2) + math.pow(self.mY_t, 2))
-        print('mLineSpeed: ', self.mLineSpeed)
+        # self.mLineSpeed = self.K_RHO * math.sqrt(math.pow(self.mX_t, 2) + math.pow(self.mY_t, 2))
+        self.mLineSpeed = 2 * self.K_RHO * math.sqrt(math.pow(self.mX_t, 2) + math.pow(self.mY_t, 2))
+        # print('mLineSpeed: ', self.mLineSpeed)
         # 计算反馈控制的输出角速度 \omega = k_\alpha\alpha + k_\beta\beta
         _l = self.AXLE_LENGTH / 2
         _r = self.WHEEL_RADIUS
         # self.mTheta = self.mRobotEulerAngle
-        self.mTheta = -self.rotationMatrixToEulerAngles(ori_t)
-        print('mTheta', self.mTheta*180/math.pi)
+        # self.mTheta = -self.rotationMatrixToEulerAngles(ori_t)
+        self.mTheta = self.mRobotEulerAngle  # replaced
+        # print('mTheta', self.mTheta*180/math.pi)
 
         # self.mTargetEulerAngle = self.rotationMatrixToEulerAngles(self.mTargetOrientation)
 
-        self.mAlpha = - self.mTheta + math.atan2(abs(self.mY_t), abs(self.mX_t))
-        self.mBeta = -self.mTheta - self.mAlpha
-        print('mAlpha: ', self.mAlpha*180/math.pi)
-        print('mBeta: ', self.mBeta*180/math.pi)
+        # self.mAlpha = - self.mTheta + math.atan2(abs(self.mY_t), abs(self.mX_t))
+        self.mAlpha = - self.mTheta + math.atan2(self.mY_t, self.mX_t)  # replaced
+        if self.mAlpha < -math.pi:  # 取两方向之间的锐角
+            self.mAlpha = 2 * math.pi + self.mAlpha
+        elif self.mAlpha > math.pi:
+            self.mAlpha = self.mAlpha - 2 * math.pi
+        if abs(self.mAlpha * 180 / math.pi) <= 2.0:  # 如果角度差小于2度，忽略好了。
+            self.mAlpha = 0
 
-        self.mRotationSpeed = self.K_ALPHA * self.mAlpha + self.K_BETA * self.mBeta
-        print('mRotationSpeed: ', self.mRotationSpeed)
+        if abs(self.mX_t) < 0.03 and abs(self.mY_t) < 0.05:  # 如果在距离目标半径6cm范围内，alpha还会产生大于10度的突变，忽略该突变。
+            if abs(self.mAlpha - self.mPreAlpha) * 180 / math.pi > 10:
+                self.mAlpha = self.mPreAlpha
+        self.mPreAlpha = self.mAlpha  # 记录上一时刻的alpha值
+        
+        # self.mBeta = -self.mTheta - self.mAlpha
+        self.mBeta = self.mTargetEulerAngle - self.mTheta - self.mAlpha  # replaced  # mBeta in range [-pi, pi]
+        if self.mBeta < -math.pi:
+            self.mBeta = 2 * math.pi + self.mBeta
+        elif self.mBeta > math.pi:
+            self.mBeta = self.mBeta - 2 * math.pi
+        if abs(self.mBeta * 180 / math.pi) <= 2:  # 如果角度差小于2度，忽略好了。
+            self.mBeta = 0
+        # print('mAlpha: ', self.mAlpha*180/math.pi)
+        # print('mBeta: ', self.mBeta*180/math.pi)
+
+        # self.mRotationSpeed = self.K_ALPHA * self.mAlpha + self.K_BETA * self.mBeta
+        self.mRotationSpeed = - 2 * self.K_ALPHA * self.mAlpha + 2 * self.K_BETA * self.mBeta
+        # print('mRotationSpeed: ', self.mRotationSpeed)
         # 计算两轮的输出转速
-        ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r 
-        ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r 
-        print('wheelspeed: ', ret)
+        # ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r 
+        # ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r 
+        if abs(self.mX_t) < 0.055 and abs(self.mY_t) < 0.06:  # 如果距离目标点小于10cm，to the next target
+            self.toNextTarget = True
+
+        if abs(self.mX_t) < 0.011 and abs(self.mY_t) < 0.012 and self.mBeta == 0:  # 如果距离目标点小于2cm，相当于到达目的地
+            self.nearDestination = True
+            # ret[0] = (_l * self.K_BETA * self.mBeta) / _r
+            # ret[1] = - ret[0]
+            ret[0] = 0    # 此处原地转圈不能实现，两个ret值互为相反数，但是两轮实际执行转速不同。
+            ret[1] = 0
+        else:
+            # 计算两轮的输出转速
+            ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r
+            ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r
+        print('\rmBeta: {}'.format(format(self.mBeta * 180 / math.pi, '.3f')),
+              'mAlpha: {}'.format(format(self.mAlpha * 180 / math.pi, '.3f')),
+              'mTheta: {}'.format(format(self.mTheta * 180 / math.pi, '.3f')),
+              'mTgEulerAng: {}'.format(format(self.mTargetEulerAngle * 180 / math.pi, '.3f')),
+              'targrt: {}'.format(format(self.mTargetEulerAngle * 180 / math.pi, '.3f')),
+              'self.mPos: {}'.format([format(self.mPos[0], '.4f'),
+                                      format(self.mPos[1], '.4f'),
+                                      ]),
+              'self.ret: {}'.format([format(ret[0], '.5f'), format(ret[1], '.5f')]),
+              'nearTarget: {}'.format(self.nearDestination),
+              end='')
         return ret
 
     def setMotorVelocity(self, speed1, speed2):
         speed1_trans = speed1 * 1000 / self.MAX_SPEED
         speed2_trans = speed2 * 1000 / self.MAX_SPEED
-        print('setspeed: ', speed1_trans, ' ', speed2_trans)
+        # print('setspeed: ', speed1_trans, ' ', speed2_trans)
         self.setSpeed(int(speed1_trans), int(speed2_trans))
 
     def rotationMatrixToEulerAngles(self, rotation_mat: np.ndarray):
