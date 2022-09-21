@@ -2,9 +2,9 @@ from Algorithm.ImageProc.ImageProcBase import ImageProcBase
 import cv2
 import numpy as np
 from Control import MainController
-
+import os
 import time
-
+import platform
 import torch
 from numpy import random
 import sys 
@@ -24,15 +24,19 @@ conf_thres = 0.25
 source = 'data/images'
 iou_thres = 0.45
 
+if platform.system() == 'Darwin':
+    YOLO_WEIGHTS = '/Users/data/yolov3.pt'
+else:
+    YOLO_WEIGHTS = '/home/data/yolov3.pt'
+
 def detect(image: np.array):
     img0 = image
-    controller = MainController.getController()
     # Initialize
     device = select_device()
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
-    model = controller.mCameraController.mModelYolo  # load FP32 model
+    model = ImageYoloV3.modelYolo  # load FP32 model
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(IMG_SIZE, s=stride)  # check img_size
     if half:
@@ -44,7 +48,7 @@ def detect(image: np.array):
 
     # Get names and colors
     names = model.module.names if hasattr(model, 'module') else model.names
-    colors = controller.mCameraController.mModelYoloColors
+    colors = ImageYoloV3.modelYoloColors
 
     # Run inference
     if device.type != 'cpu':
@@ -79,11 +83,16 @@ def detect(image: np.array):
     return im0
 
 class ImageYoloV3(ImageProcBase):
+    modelYolo = None
+    modelYoloColors = None
     def __init__(self) -> None:
         super().__init__()
         self.Name = r'YoloV3'
+        # self.mModelYolo = None 
 
     def process(self, image: np.ndarray) -> np.ndarray:
+        if ImageYoloV3.modelYolo is None:
+            ImageYoloV3.loadModel()
         ret = super().process(image)
         # print(self.channels(image))
         if self.channels(image) == 1:
@@ -96,8 +105,8 @@ class ImageYoloV3(ImageProcBase):
             再此处添加算法，例如：
             image_tmp = 255 - image_tmp
             '''
-            controller = MainController.getController()
-            if controller.mCameraController.mModelYolo is not None:
+            # controller = MainController.getController()
+            if ImageYoloV3.mModelYolo is not None:
                 image_tmp = detect(image_tmp)
             else:
                 print('Yolo model is not loaded')
@@ -106,3 +115,14 @@ class ImageYoloV3(ImageProcBase):
         else:
             raise Exception('图像类型不支持')
         return ret
+
+    def loadModel():
+        if os.path.exists(YOLO_WEIGHTS):
+            device = select_device()
+            ImageYoloV3.modelYolo = attempt_load(YOLO_WEIGHTS, map_location=device)
+            # Get names and colors
+            names = ImageYoloV3.modelYolo.module.names if hasattr(ImageYoloV3.modelYolo , 'module') else ImageYoloV3.modelYolo.names
+            ImageYoloV3.modelYoloColors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+        else: 
+            ImageYoloV3.modelYolo = None
+            ImageYoloV3.modelYoloColors = None

@@ -32,3 +32,5 @@ cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
 ## todo list
 - 更多的算法插件
 - 解决旋转图像无法保存的问题
+- 手机作为wifi摄像头
+- 服务器无界面版

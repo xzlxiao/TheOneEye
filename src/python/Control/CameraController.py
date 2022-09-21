@@ -21,6 +21,7 @@ Dependencies：
 Updating Records:
 2021-01-22 09:38:15 xzl
 """
+from matplotlib.cbook import ls_mapper
 from Common.DebugPrint import myDebug, get_current_function_name
 import sys
 sys.path.append("../")
@@ -71,15 +72,18 @@ class CameraController(QObject):
         # self.mCameraHandledImage = {}
         self.mCameraAvailable = []
         self.mCameraNum = 0
-        if os.path.exists(YOLO_WEIGHTS):
-            device = select_device()
-            self.mModelYolo = attempt_load(YOLO_WEIGHTS, map_location=device)
-            # Get names and colors
-            names = self.mModelYolo.module.names if hasattr(self.mModelYolo, 'module') else self.mModelYolo.names
-            self.mModelYoloColors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
-        else: 
-            self.mModelYolo = None
-            self.mModelYoloColors = None
+
+        # self.mCellphoneList = {}
+        # self.mCellphoneNum = 0
+        # if os.path.exists(YOLO_WEIGHTS):
+        #     device = select_device()
+        #     self.mModelYolo = attempt_load(YOLO_WEIGHTS, map_location=device)
+        #     # Get names and colors
+        #     names = self.mModelYolo.module.names if hasattr(self.mModelYolo, 'module') else self.mModelYolo.names
+        #     self.mModelYoloColors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+        # else: 
+        #     self.mModelYolo = None
+        #     self.mModelYoloColors = None
 
     def run(self):
         # myDebug(self.__class__.__name__, get_current_function_name())
@@ -130,6 +134,14 @@ class CameraController(QObject):
         if isChanged:
             self.signalCamerasChanged.emit()
 
+
+    # def startCellphone(self, ip: str):
+    #     myDebug(self.__class__.__name__, get_current_function_name())
+    #     phone_index = len(self.mCellphoneList)
+    #     self.mCellphoneList[phone_index] = CellphoneInterface()
+    #     self.mCellphoneList[phone_index].setID(phone_index)
+    #     self.mCellphoneList[phone_index].setIP(ip)
+    #     self.mCellphoneList[phone_index].connect()
 
     def startCamera(self, cam_id: int, camera_type:XCameraType=XCameraType.X_USB_CAM):
         myDebug(self.__class__.__name__, get_current_function_name())

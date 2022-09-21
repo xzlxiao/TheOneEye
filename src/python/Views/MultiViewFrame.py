@@ -12,12 +12,15 @@ from Entity.RobotEpuck import RobotEpuck
 from Entity.RobotVEpuck import RobotVEpuck
 from Entity.RobotTwinsEpuck import RobotTwinsEpuck
 from Views.CameraViewFrame import CameraViewFrame
+from Views.CellphoneFrame import CellphoneFrame
 from Views.ImageProcViewFrame import ImageProcViewFrame
 from Views.ViewFrameBase import ViewFrameBase
 from Views.RobotFrame import RobotFrame
 from Views.MultiRobotControlFrame import MultiRobotControlFrame
 from Control.CameraController import XCameraType
 import copy
+
+from Entity.RobotCellphone import RobotCellphone
 
 class MultiViewFrame(QFrame):
     signalViewFocusChanged = pyqtSignal()
@@ -64,6 +67,10 @@ class MultiViewFrame(QFrame):
             camera_list.addAction(cam_action)
         menu.addMenu(camera_list)
 
+        add_cellphone_proc_action = QAction('新建手机视图', menu)
+        add_cellphone_proc_action.triggered.connect(self.slot_add_cellphone_proc_view)
+        menu.addAction(add_cellphone_proc_action)
+
         add_image_proc_action = QAction('添加图像处理视图', menu)
         add_image_proc_action.triggered.connect(self.slot_add_image_proc_view)
         menu.addAction(add_image_proc_action)
@@ -96,6 +103,37 @@ class MultiViewFrame(QFrame):
         #     if event.button() == QtCore.Qt.RightButton:
         menu=self.mkQMenu()
         menu.exec_(event.globalPos())
+
+
+    def slot_add_cellphone_proc_view(self):
+        dialog = QInputDialog(self)
+        dialog.setModal(True)
+        dialog.setStyleSheet("""
+        background-color: rgba(0, 0, 0, 200);
+        border:1px solid rgba(0, 200, 200, 150);
+        """)
+        dialog.setFixedSize(350,250) 
+        dialog.setWindowTitle('Set Input Cellphone')
+        dialog.setInputMode(QInputDialog.TextInput)
+        dialog.setLabelText('Input……（Cellphone\'s ip:port）')
+        dialog.setTextValue('127.0.0.1:8881')
+        dialog.setOkButtonText('Ok')
+        dialog.setCancelButtonText('Cancel')
+        if dialog.exec_() == QDialog.Accepted:
+            dir = dialog.textValue()
+            robot_controller = MainController.getController().mRobotController
+            
+            robot_controller.addRobot(RobotCellphone)
+            robot = robot_controller.getRobot(-1)
+            # robot:RobotVEpuck
+            robot.setParent(self)
+            robot.connect(dir)
+            view = CellphoneFrame(self)
+            view.setRobot(robot)
+            self.addSubview(view)
+        else:
+            print("dialog canceled")
+        dialog.show()
 
     def slot_add_multi_robots_view(self):
         dialog = QInputDialog(self)

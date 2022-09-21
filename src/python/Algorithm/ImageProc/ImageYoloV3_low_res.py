@@ -1,4 +1,5 @@
 from Algorithm.ImageProc.ImageProcBase import ImageProcBase
+from Algorithm.ImageProc.ImageYoloV3 import ImageYoloV3
 import cv2
 import numpy as np
 from Control import MainController
@@ -26,13 +27,12 @@ iou_thres = 0.45
 
 def detect(image: np.array):
     img0 = image
-    controller = MainController.getController()
     # Initialize
     device = select_device()
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
-    model = controller.mCameraController.mModelYolo  # load FP32 model
+    model = ImageYoloV3.modelYolo  # load FP32 model
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(IMG_SIZE, s=stride)  # check img_size
     if half:
@@ -44,7 +44,7 @@ def detect(image: np.array):
 
     # Get names and colors
     names = model.module.names if hasattr(model, 'module') else model.names
-    colors = controller.mCameraController.mModelYoloColors
+    colors = ImageYoloV3.modelYoloColors
 
     # Run inference
     if device.type != 'cpu':
@@ -84,6 +84,8 @@ class ImageYoloV3_low_res(ImageProcBase):
         self.Name = r'YoloV3_Low_res'
 
     def process(self, image: np.ndarray) -> np.ndarray:
+        if ImageYoloV3.modelYolo is None:
+            ImageYoloV3.loadModel()
         ret = super().process(image)
         # print(self.channels(image))
         if self.channels(image) == 1:
@@ -96,8 +98,7 @@ class ImageYoloV3_low_res(ImageProcBase):
             再此处添加算法，例如：
             image_tmp = 255 - image_tmp
             '''
-            controller = MainController.getController()
-            if controller.mCameraController.mModelYolo is not None:
+            if ImageYoloV3.modelYolo is not None:
                 image_tmp = detect(image_tmp)
             else:
                 print('Yolo model is not loaded')
