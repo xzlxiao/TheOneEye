@@ -17,8 +17,9 @@ import {
     useCameraDevices,
     useFrameProcessor,
     VideoFile,
+    CameraPermissionStatus,
 } from 'react-native-vision-camera';
-import React, { type PropsWithChildren } from 'react';
+import React, { type PropsWithChildren, useEffect, useState } from 'react';
 import {
     ScrollView,
     Settings,
@@ -45,7 +46,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeView from './scripts/Views/HomeView';
 import SettingsView from './scripts/Views/SettingsView';
-import TestView from './scripts/Views/TestView';
+// import TestView from './scripts/Views/TestView';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const Section: React.FC<
@@ -80,109 +81,139 @@ const Section: React.FC<
 
 const Tab = createBottomTabNavigator();
 
-// const App = () => {
-//     const isDarkMode = useColorScheme() === 'dark';
+const App = (): React.ReactElement | null => {
+    const isDarkMode = useColorScheme() === 'dark';
+    const [cameraPermission, setCameraPermission] = useState<CameraPermissionStatus>();
+    const [microphonePermission, setMicrophonePermission] = useState<CameraPermissionStatus>();
 
-//     const backgroundStyle = {
-//         backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-//     };
-//     return (
-//         <SafeAreaProvider>
-//             {/* <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} /> */}
-//             <NavigationContainer>
-//                 <Tab.Navigator
-//                     screenOptions={({ route }) => ({
-//                         tabBarIcon: ({ focused, color, size }) => {
-//                             let iconName: string = '';
+    const backgroundStyle = {
+        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    };
 
-//                             if (route.name === 'Home') {
-//                                 iconName = focused
-//                                     ? 'nuclear'
-//                                     : 'nuclear-outline';
-//                             }
-//                             else if (route.name === 'Settings') {
-//                                 iconName = focused ? 'person' : 'person-outline';
-//                             }
-//                             else if (route.name === 'Test') {
-//                                 iconName = focused ? 'terminal' : 'terminal-outline';
-//                             }
+    useEffect(() => {
+        Camera.getCameraPermissionStatus().then(setCameraPermission);
+        Camera.getMicrophonePermissionStatus().then(setMicrophonePermission);
+    }, []);
 
-//                             // You can return any component that you like here!
-//                             return <Ionicons name={iconName} size={size} color={color} />;
-//                         },
-//                         tableActiveTintColor: 'tomato',
-//                         tableInactiveTintColor: 'gray',
-//                         tableStyle: [
-//                             {
-//                                 "display": "flex"
-//                             },
+    console.log(`Re-rendering Navigator. Camera: ${cameraPermission} | Microphone: ${microphonePermission}`);
 
-//                         ]
-//                     })}
-//                 >
-//                     <Tab.Screen name="Home" component={HomeView} />
-//                     <Tab.Screen name="Test" component={TestView} />
-//                     <Tab.Screen name="Settings" component={SettingsView} />
-//                 </Tab.Navigator>
-//             </NavigationContainer>
+    const showPermissionsPage = cameraPermission !== 'authorized' || microphonePermission === 'not-determined';
+    return (
+        <SafeAreaProvider>
+            {/* <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} /> */}
+            <NavigationContainer>
+                <Tab.Navigator
+                    screenOptions={({ route }) => ({
+                        tabBarIcon: ({ focused, color, size }) => {
+                            let iconName: string = '';
 
-//         </SafeAreaProvider>
-//     );
-// };
+                            if (route.name === 'Home') {
+                                iconName = focused
+                                    ? 'nuclear'
+                                    : 'nuclear-outline';
+                            }
+                            else if (route.name === 'Settings') {
+                                iconName = focused ? 'person' : 'person-outline';
+                            }
+                            else if (route.name === 'Test') {
+                                iconName = focused ? 'terminal' : 'terminal-outline';
+                            }
 
-function App() {
-    const devices = useCameraDevices('wide-angle-camera')
-    const device = devices.back 
-    // 从相机中选择
-    console.log('test');
-    console.log('test');
-    console.log('test');
-    if(Platform.OS === 'android'){
-        PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA)
-            .then(res => {
-                if(res !== 'granted') {
-                    Alert.alert('相机权限没打开', '请在手机的“设置”选项中,允许访问您的摄像头和麦克风')
-                }
-                else
-                {
-                    console.log('相机权限已打开');
-                    if (device == null) return <Text>loading</Text>
-                    return (
-                    <Camera
-                        style={StyleSheet.absoluteFill}
-                        device={device}
-                        isActive={true}
-                    />
-                    )
-                }
-            });
-    } else {
-        if(Camera){
-            Camera.getCameraPermissionStatus()
-                .then(access => {
-                    if(!access) {
-                        Alert.alert('相机权限没打开', '请在iPhone的“设置-隐私”选项中,允许访问您的摄像头和麦克风')
-                    }
-                    else 
-                    {
-                        if (device == null) return <Text>loading</Text>
-                        return (
-                        <Camera
-                            style={StyleSheet.absoluteFill}
-                            device={device}
-                            isActive={true}
-                        />
-                        )
-                    }
-                });
-        }
-    }
+                            // You can return any component that you like here!
+                            return <Ionicons name={iconName} size={size} color={color} />;
+                        },
+                        tableActiveTintColor: 'tomato',
+                        tableInactiveTintColor: 'gray',
+                        tableStyle: [
+                            {
+                                "display": "flex"
+                            },
+
+                        ]
+                    })}
+                >
+                    <Tab.Screen name="Home" component={HomeView} />
+                    {/* <Tab.Screen name="Test" component={TestView} /> */}
+                    <Tab.Screen name="Settings" component={SettingsView} />
+                </Tab.Navigator>
+            </NavigationContainer>
+
+        </SafeAreaProvider>
+    );
+};
+
+// function App() {
+//     // const devices = useCameraDevices('wide-angle-camera')
+//     const devices = useCameraDevices()
+//     const device = devices.back 
+//     // 从相机中选择
+
+//     const frameProcessor = useFrameProcessor((frame) => {
+//         console.log('frameProcessor');
+//         // 处理图像frame
+//     }, [])
+//     console.log('test');
+    
+//     if(Platform.OS === 'android'){
+//         PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA)
+//             .then(res => {
+//                 if(res !== 'granted') {
+//                     Alert.alert('相机权限没打开', '请在手机的“设置”选项中,允许访问您的摄像头和麦克风')
+//                 }
+//                 else
+//                 {
+//                     console.log('相机权限已打开');
+//                     if (device == null) return <Text>loading</Text>
+//                     return (
+//                     <Camera
+//                         style={StyleSheet.absoluteFill}
+//                         device={device}
+//                         isActive={true}
+//                         frameProcessor={frameProcessor}
+//                     />
+//                     )
+//                 }
+//             });
+//     } else {
+//         if(Camera){
+//             Camera.getCameraPermissionStatus()
+//                 .then(access => {
+//                     if(!access) {
+//                         Alert.alert('相机权限没打开', '请在iPhone的“设置-隐私”选项中,允许访问您的摄像头和麦克风')
+//                     }
+//                     else 
+//                     {
+//                         console.log('成功打开');
+//                         if (device == null) return <Text>loading</Text>
+//                         return (
+//                         <SafeAreaView
+//                             style={styles.SafeAreaView}
+//                         >
+//                             <Text>Camera</Text>
+//                             {/* <Camera
+//                                 style={StyleSheet.absoluteFill}
+//                                 device={device}
+//                                 isActive={true}
+//                                 frameProcessor={frameProcessor}
+//                             /> */}
+//                         </SafeAreaView>
+                        
+//                         )
+//                     }
+//                 });
+//         }
+//     }
 
   
     
-  }
+//   }
 
 const styles = StyleSheet.create({
+    SafeAreaView: {
+        flex: 1,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
     sectionContainer: {
         marginTop: 32,
         paddingHorizontal: 24,

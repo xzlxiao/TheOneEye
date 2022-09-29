@@ -15,6 +15,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { MainController } from '../Controller/MainController';
 import ViewHeader from './Components/ViewHeader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Camera, CameraPermissionStatus } from 'react-native-vision-camera';
+
 
 // function NotificationsScreen({ navigation }) {
 //     return (
@@ -47,8 +49,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 class HomeView extends Component
 {
-    state = { postText: '' };
+    state = {   
+                postText: '',
+                cameraPermissionStatus: 'not-determined' as CameraPermissionStatus,
+                microphonePermissionStatus: 'not-determined' as CameraPermissionStatus,
+            };
 
+    async requestMicrophonePermission() {
+        
+    }
     render() 
     {
         return(

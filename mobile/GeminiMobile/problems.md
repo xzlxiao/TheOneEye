@@ -1,7 +1,24 @@
+- [ ] 'react/bridging/CallbackWrapper.h' file not found
+> If nothing of the links I pasted in the question work, what finally worked for me was:
+> 1. Updgrade React Native to >= 0.69.3 (my version was 0.69.0). To do that `npx react-native upgrade`.
+> 2. Delete `Pods folder` and `Podfile.lock` from iOS folder. Run `pod install`.
+> 
+> And then building the project again.
+
+--------------
+
+- [ ] Gradle sync failed: Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed) (23 s 931 ms)
+
+```
+brew install --cask zulu11
+```
+
+-------------
 - [x] IonIcons的图标无法显示
 > 需要修改gradle，[网址](https://github.com/oblador/react-native-vector-icons)
 
-- [ ] ViewPropTypes has been removed from React Native. Migrate to ViewPropTypes exported from 'deprecated-react-native-prop-types'. 
+-----------------
+- [x] ViewPropTypes has been removed from React Native. Migrate to ViewPropTypes exported from 'deprecated-react-native-prop-types'. 
 > 由于react native 升级到 0.69.2导致，同时，难以降级到0.67
 > 解决方案如下：
 >> Nice discussion going on here, inspired me to implement a workaround in our app using patch-package.
@@ -14,3 +31,4 @@
 4. Save and run npx patch-package react-native to save the patch.
 5. Rebuild and the app should launch.
 >> Only thing to keep in mind is that this patch will need to be reapplied with every upgrade to react-native, or until the libraries in question are updated to import from deprecated-react-native-prop-types instead.
+
