@@ -4,6 +4,8 @@ It's designed for machine vision testing tasks.
 
 ![](resource/file_res/TOE.gif)
 
+![](resource/images/robot_detect.png)
+
 ## evironment setup
 - sudo apt install libqt5multimedia5-plugins
 - sudo apt install libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
