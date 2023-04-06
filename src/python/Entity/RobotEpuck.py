@@ -27,7 +27,84 @@ SENSORS_PACKET_SIZE = 104
 
 class RobotControlMode(Enum):
     RemoteControl = 0
-    PolicyControl = 1
+    PolicyControl = 1        
+
+
+class PathFinderController:
+    """
+    Constructs an instantiate of the PathFinderController for navigating a
+    3-DOF wheeled robot on a 2D plane
+
+    Parameters
+    ----------
+    Kp_rho : The linear velocity gain to translate the robot along a line
+             towards the goal
+    Kp_alpha : The angular velocity gain to rotate the robot towards the goal
+    Kp_beta : The offset angular velocity gain accounting for smooth merging to
+              the goal angle (i.e., it helps the robot heading to be parallel
+              to the target angle.)
+    """
+
+    def __init__(self, Kp_rho, Kp_alpha, Kp_beta):
+        self.Kp_rho = Kp_rho
+        self.Kp_alpha = Kp_alpha
+        self.Kp_beta = Kp_beta
+
+    def calc_control_command(self, x_diff, y_diff, theta, theta_goal, alpha_pre):
+        """
+        Returns the control command for the linear and angular velocities as
+        well as the distance to goal
+
+        Parameters
+        ----------
+        x_diff : The position of target with respect to current robot position
+                 in x direction
+        y_diff : The position of target with respect to current robot position
+                 in y direction
+        theta : The current heading angle of robot with respect to x axis
+        theta_goal: The target angle of robot with respect to x axis
+
+        Returns
+        -------
+        rho : The distance between the robot and the goal position
+        v : Command linear velocity
+        w : Command angular velocity
+        """
+
+        # Description of local variables:
+        # - alpha is the angle to the goal relative to the heading of the robot
+        # - beta is the angle between the robot's position and the goal
+        #   position plus the goal angle
+        # - Kp_rho*rho and Kp_alpha*alpha drive the robot along a line towards
+        #   the goal
+        # - Kp_beta*beta rotates the line so that it is parallel to the goal
+        #   angle
+        #
+        # Note:
+        # we restrict alpha and beta (angle differences) to the range
+        # [-pi, pi] to prevent unstable behavior e.g. difference going
+        # from 0 rad to 2*pi rad with slight turn
+
+        rho = np.hypot(x_diff, y_diff)
+        alpha = (np.arctan2(y_diff, x_diff)
+                 - theta + np.pi) % (2 * np.pi) - np.pi
+        beta = (theta_goal - theta - alpha + np.pi) % (2 * np.pi) - np.pi
+
+        # if abs(alpha * 180 / math.pi) <= 2.0:  # 如果角度差小于2度，忽略好了。
+        #     alpha = 0
+        # if rho < 60:  # 如果在距离目标半径6cm范围内，alpha还会产生大于10度的突变，忽略该突变。
+        #     if abs(alpha - alpha_pre) * 180 / math.pi > 10:
+        #         alpha = alpha_pre
+        # if abs(beta * 180 / math.pi) <= 2:  # 如果角度差小于2度，忽略好了。
+        #     beta = 0
+
+        v = self.Kp_rho * rho
+        w = self.Kp_alpha * alpha - self.Kp_beta * beta
+
+        if alpha > np.pi / 2 or alpha < -np.pi / 2:
+            v = -v
+
+        return v, w, rho, alpha, beta
 
 
 class RobotEpuck(RobotBase):
@@ -36,6 +113,7 @@ class RobotEpuck(RobotBase):
         super().__init__(parent)
         self.mRobotType = "RobotEpuck"
         self.mState = RobotControlMode.PolicyControl
+        self.isTestRobot = False                        # 是否是用于测试模式，测试模式下epuck无需开机，程序不会连接到epuck
         self.mCamera = CameraEPuck(self)
         self.mPopulation = population
         self.mPos = np.array(pos, dtype=np.float)
@@ -76,12 +154,14 @@ class RobotEpuck(RobotBase):
         self.mPolicy:RobotPolicyBase = None         # 机器人的决策，通过插件更改
 
         self.isGetLocationFromGlobal = True
+        self.isDataStreamOn = False                 # 是否开启机器人数据传输到主机
 
         self.nearDestination = False
         self.toNextTarget = False   # if a robot has near the now target, it change the target value to the next target, to avoid speed down,
 
         # 参数
         self.MAX_SPEED = float(XSetting.getValue('Epuck/MAX_SPEED'))
+        self.mMaxAngularSpeed = float(XSetting.getValue('Epuck/MAX_ROTATION_SPEED'))
         self.WHEEL_RADIUS = float(XSetting.getValue('Epuck/WHEEL_RADIUS'))
         self.AXLE_LENGTH = float(XSetting.getValue('Epuck/AXLE_LENGTH'))
         self.K_RHO = float(XSetting.getValue('Epuck/K_RHO'))
@@ -90,7 +170,7 @@ class RobotEpuck(RobotBase):
 
     def initCommand(self):
         myDebug(self.__class__.__name__, get_current_function_name())
-        self.mCommand[0] = 0x80	# Packet id for settings actuators
+        self.mCommand[0] = 0x80	    # Packet id for settings actuators
         self.mCommand[1] = 1		# Request: only sensors enabled
         self.mCommand[2] = 0		# Settings: set motors speed
         self.mCommand[3] = 0		# left motor LSB
@@ -114,7 +194,7 @@ class RobotEpuck(RobotBase):
 
     def setTarget(self, target):
         super().setTarget(target)
-        self.mTargetOrientation[0, 0] 
+        # self.mTargetOrientation[0, 0] 
 
         # 旧代码
         # if target[5] > 0:
@@ -123,13 +203,13 @@ class RobotEpuck(RobotBase):
         #     self.mTargetEulerAngle = target[5]
 
         # 黄吉修改代码 start
-        if target[5] > 180:  # if input in range [0, 360]
-            self.mTargetEulerAngle = -360 + target[5]
-        else:
-            self.mTargetEulerAngle = target[5]
+        # if target[5] > 180:  # if input in range [0, 360]
+        #     self.mTargetEulerAngle = -360 + target[5]
+        # else:
+        #     self.mTargetEulerAngle = target[5]
         # 黄吉修改代码 end
 
-        self.mTargetEulerAngle = self.mTargetEulerAngle*math.pi/180
+        self.mTargetEulerAngle = target[5]*math.pi/180
         sin_i = math.sin(self.mTargetEulerAngle)
         cos_i = math.cos(self.mTargetEulerAngle)
         self.mTargetOrientation[0, 0] = cos_i
@@ -162,20 +242,34 @@ class RobotEpuck(RobotBase):
         """
         # myDebug(self.__class__.__name__, get_current_function_name())
         # If there was some errors in sending or receiving then try to close the connection and reconnect.
-        if not self.isConnected:
+        if not self.isConnected and not self.isTestRobot:
             self.socket_error = 0
             self.connect(self.client_addr)
 
-        if self.mPolicy is not None and self.mState == RobotControlMode.PolicyControl:
+        # if self.mPolicy is not None and self.mState == RobotControlMode.PolicyControl:
+        if self.mPolicy is not None:
             self.mPolicy.update()
         
         # Send a command to the robot.
-        self.mCommand[1] = 3
-        self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
-        self.getState()
-        self.mCommand[1] = 2	
-        self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
-        self.getState()
+        # self.mCommand[1] = 3
+        # self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
+        # self.getState()
+        # self.mCommand[1] = 2	
+        # self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
+        # self.getState()
+        if self.isDataStreamOn and not self.isTestRobot:
+            self.mCommand[1] = 3
+            self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
+            self.getState()
+            self.mCommand[1] = 2	
+            self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
+            self.getState()
+        elif not self.isTestRobot:
+            self.mCommand[1] = 0
+            self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
+        # self.mCommand[1] = 2	
+        # self.sendCommand(self.getCommand(), COMMAND_PACKET_SIZE)
+        # self.getState()
         if self.isGetLocationFromGlobal:
             self.queryGlobalLocation()
 
@@ -474,27 +568,21 @@ class RobotEpuck(RobotBase):
     def queryGlobalLocation(self):
         controller = MainController.getController()
         data_tmp = controller.mCameraData.getData('GlobalLocation', self.mId)
+        
         if data_tmp is not None:
             data = np.array(controller.mCameraData.getData('GlobalLocation', self.mId), dtype=np.float)
             self.setSelfPos(data)
         
     def setSelfPos(self, data):
-        # 旧代码
-        # self.mPos[:] = data[0:3]/1000
+        # 目前坐标是左上为原点，单位是比例，需要转换为中间是原点，单位是米
+        # 检验控制流程
+        self.mPos[:] = data[0:3]
         # if data[5] > 0:
         #     self.mRobotEulerAngle = -180 + data[5]
         # else:
         #     self.mRobotEulerAngle = 180 + data[5]
+        self.mRobotEulerAngle = data[5]
 
-        # 黄吉修改代码 start
-        self.mRobotEulerAngle = - data[5] + 90
-        if self.mRobotEulerAngle > 180:
-            self.mRobotEulerAngle = self.mRobotEulerAngle - 360
-        elif self.mRobotEulerAngle < -180:
-            self.mRobotEulerAngle = self.mRobotEulerAngle + 360
-        # 黄吉修改代码 end
-
-        self.mRobotEulerAngle = self.mRobotEulerAngle*math.pi/180
         sin_i = math.sin(self.mRobotEulerAngle)
         cos_i = math.cos(self.mRobotEulerAngle)
         self.mOrientation[0, 0] = cos_i
@@ -508,8 +596,9 @@ class RobotEpuck(RobotBase):
         self.mSpeedWheels = self.expectedWheelsSpeed()
 
         # 旧代码
-        # speed1 = 0.0
-        # speed2 = 0.0
+        speed1 = 0.0
+        speed2 = 0.0
+        speed1, speed2 = self.mSpeedWheels
         # if self.mSpeedWheels[0] > self.MAX_SPEED:
         #     speed1 = self.MAX_SPEED
         # elif self.mSpeedWheels[0] < -self.MAX_SPEED:
@@ -552,108 +641,92 @@ class RobotEpuck(RobotBase):
                 speed2 = self.mSpeedWheels[1]
 
         # 黄吉修改代码 end
-        self.setMotorVelocity(speed1, speed2)
 
-    def expectedWheelsSpeed(self) -> np.ndarray: 
-        # 现将机器人自身坐标和角度从世界坐标系转换到目标坐标系下
-        ret: np.ndarray = np.zeros((2), dtype=np.float)
-        self.mTargetOrientation: np.ndarray
-        # print()
-        # print('(self.mPos - self.mTarget).T: ', self.mTarget - self.mPos)
-        # print('self.mTargetOrientation.T: ', self.mTargetOrientation.T)
-        # pos_t = np.matmul(self.mTargetOrientation.T, (self.mTarget - self.mPos)) 
-        # ori_t = np.matmul(self.mTargetOrientation.T, self.mOrientation)
-        # print('pos_t: ', pos_t)
-        # print('ori_t: ', ori_t)
-
-        pos_t = self.mTarget - self.mPos   # replaced
-        ori_t = self.mOrientation          # replaced
-
-        self.mX_t = pos_t[0]
-        self.mY_t = pos_t[1]
-        # 计算反馈控制的输出线速度 \nu = k_{\rho}\rho
-        # self.mLineSpeed = self.K_RHO * math.sqrt(math.pow(self.mX_t, 2) + math.pow(self.mY_t, 2))
-        self.mLineSpeed = 2 * self.K_RHO * math.sqrt(math.pow(self.mX_t, 2) + math.pow(self.mY_t, 2))
-        # print('mLineSpeed: ', self.mLineSpeed)
-        # 计算反馈控制的输出角速度 \omega = k_\alpha\alpha + k_\beta\beta
-        _l = self.AXLE_LENGTH / 2
-        _r = self.WHEEL_RADIUS
-        # self.mTheta = self.mRobotEulerAngle
-        # self.mTheta = -self.rotationMatrixToEulerAngles(ori_t)
-        self.mTheta = self.mRobotEulerAngle  # replaced
-        # print('mTheta', self.mTheta*180/math.pi)
-
-        # self.mTargetEulerAngle = self.rotationMatrixToEulerAngles(self.mTargetOrientation)
-
-        # self.mAlpha = - self.mTheta + math.atan2(abs(self.mY_t), abs(self.mX_t))
-        self.mAlpha = - self.mTheta + math.atan2(self.mY_t, self.mX_t)  # replaced
-        if self.mAlpha < -math.pi:  # 取两方向之间的锐角
-            self.mAlpha = 2 * math.pi + self.mAlpha
-        elif self.mAlpha > math.pi:
-            self.mAlpha = self.mAlpha - 2 * math.pi
-        if abs(self.mAlpha * 180 / math.pi) <= 2.0:  # 如果角度差小于2度，忽略好了。
-            self.mAlpha = 0
-
-        if abs(self.mX_t) < 0.03 and abs(self.mY_t) < 0.05:  # 如果在距离目标半径6cm范围内，alpha还会产生大于10度的突变，忽略该突变。
-            if abs(self.mAlpha - self.mPreAlpha) * 180 / math.pi > 10:
-                self.mAlpha = self.mPreAlpha
-        self.mPreAlpha = self.mAlpha  # 记录上一时刻的alpha值
-        
-        # self.mBeta = -self.mTheta - self.mAlpha
-        self.mBeta = self.mTargetEulerAngle - self.mTheta - self.mAlpha  # replaced  # mBeta in range [-pi, pi]
-        if self.mBeta < -math.pi:
-            self.mBeta = 2 * math.pi + self.mBeta
-        elif self.mBeta > math.pi:
-            self.mBeta = self.mBeta - 2 * math.pi
-        if abs(self.mBeta * 180 / math.pi) <= 2:  # 如果角度差小于2度，忽略好了。
-            self.mBeta = 0
-        # print('mAlpha: ', self.mAlpha*180/math.pi)
-        # print('mBeta: ', self.mBeta*180/math.pi)
-
-        # self.mRotationSpeed = self.K_ALPHA * self.mAlpha + self.K_BETA * self.mBeta
-        self.mRotationSpeed = - 2 * self.K_ALPHA * self.mAlpha + 2 * self.K_BETA * self.mBeta
-        # print('mRotationSpeed: ', self.mRotationSpeed)
-        # 计算两轮的输出转速
-        # ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r 
-        # ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r 
-        if abs(self.mX_t) < 0.055 and abs(self.mY_t) < 0.06:  # 如果距离目标点小于10cm，to the next target
-            self.toNextTarget = True
-
-        if abs(self.mX_t) < 0.011 and abs(self.mY_t) < 0.012 and self.mBeta == 0:  # 如果距离目标点小于2cm，相当于到达目的地
-            self.nearDestination = True
-            # ret[0] = (_l * self.K_BETA * self.mBeta) / _r
-            # ret[1] = - ret[0]
-            ret[0] = 0    # 此处原地转圈不能实现，两个ret值互为相反数，但是两轮实际执行转速不同。
-            ret[1] = 0
-        else:
-            # 计算两轮的输出转速
-            ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r
-            ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r
-        print('\rmBeta: {}'.format(format(self.mBeta * 180 / math.pi, '.3f')),
+        if self.mState == RobotControlMode.PolicyControl and not self.isTestRobot:
+            self.setMotorVelocity(speed1, speed2)
+        if self.isTestRobot:
+            print('mBeta: {}'.format(format(self.mBeta * 180 / math.pi, '.3f')),
               'mAlpha: {}'.format(format(self.mAlpha * 180 / math.pi, '.3f')),
-              'mTheta: {}'.format(format(self.mTheta * 180 / math.pi, '.3f')),
+            #   'mTheta: {}'.format(format(self.mTheta * 180 / math.pi, '.3f')),
               'mTgEulerAng: {}'.format(format(self.mTargetEulerAngle * 180 / math.pi, '.3f')),
-              'targrt: {}'.format(format(self.mTargetEulerAngle * 180 / math.pi, '.3f')),
+              'targrt: {}'.format(self.mTarget),
               'self.mPos: {}'.format([format(self.mPos[0], '.4f'),
                                       format(self.mPos[1], '.4f'),
                                       ]),
-              'self.ret: {}'.format([format(ret[0], '.5f'), format(ret[1], '.5f')]),
-              'nearTarget: {}'.format(self.nearDestination),
-              end='')
+              'line_speed: %.4f' % self.mLineSpeed,
+              'rotation_speed: %.4f' % self.mRotationSpeed,
+              'Speed: {}'.format(['%.2f' % speed1, '%.2f' % speed2]),
+            #   'nearTarget: {}'.format(self.nearDestination),
+              end='\r')
+            pass
+
+    def expectedWheelsSpeed(self) -> np.ndarray: 
+        # 现将机器人自身坐标和角度从世界坐标系转换到目标坐标系下
+
+        path_following_control = PathFinderController(self.K_RHO, self.K_ALPHA, self.K_BETA)
+        robot_pos = self.mPos * 1000  # 转换为mm
+        target_pos = self.mTarget * 1000
+        var_pos = target_pos - robot_pos   # replaced
+        # print(self.mRobotEulerAngle)
+        # print(self.mTargetEulerAngle)
+        line_speed, rotation_speed, rho, alpha, beta = path_following_control.calc_control_command(var_pos[0], var_pos[1], self.mRobotEulerAngle, self.mTargetEulerAngle, self.mPreAlpha)
+        # print(line_speed, rotation_speed)
+        ret: np.ndarray = np.zeros((2), dtype=np.float)
+
+        # self.mX_t = pos_t[0]
+        # self.mY_t = pos_t[1]
+        line_speed /= 1000
+        rotation_speed /= 50
+
+        if abs(line_speed) > self.MAX_SPEED:
+            line_speed = np.sign(line_speed) * self.MAX_SPEED
+
+        if abs(rotation_speed) > self.mMaxAngularSpeed:
+            rotation_speed = np.sign(rotation_speed) * self.mMaxAngularSpeed
+
+        self.mLineSpeed = line_speed
+        self.mRotationSpeed = rotation_speed 
+
+        _l = self.AXLE_LENGTH / 2
+        _r = self.WHEEL_RADIUS
+ 
+        # self.mTheta = self.mRobotEulerAngle  # replaced
+
+        self.mAlpha = alpha
+        self.mBeta = beta
+
+        self.mPreAlpha = self.mAlpha  # 记录上一时刻的alpha值
+        
+
+        # if abs(self.mX_t) < 0.055 and abs(self.mY_t) < 0.06:  # 如果距离目标点小于10cm，to the next target
+        #     self.toNextTarget = True
+
+        # if abs(self.mX_t) < 0.011 and abs(self.mY_t) < 0.012 and self.mBeta == 0:  # 如果距离目标点小于2cm，相当于到达目的地
+        #     self.nearDestination = True
+        #     # ret[0] = (_l * self.K_BETA * self.mBeta) / _r
+        #     # ret[1] = - ret[0]
+        #     ret[0] = 0    # 此处原地转圈不能实现，两个ret值互为相反数，但是两轮实际执行转速不同。
+        #     ret[1] = 0
+        # else:
+        #     # 计算两轮的输出转速
+        #     ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r
+        #     ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r
+        ret[0] = (self.mLineSpeed + _l * self.mRotationSpeed) / _r
+        ret[1] = (self.mLineSpeed - _l * self.mRotationSpeed) / _r
+        
         return ret
 
     def setMotorVelocity(self, speed1, speed2):
         speed1_trans = speed1 * 1000 / self.MAX_SPEED
         speed2_trans = speed2 * 1000 / self.MAX_SPEED
-        # print('setspeed: ', speed1_trans, ' ', speed2_trans)
         self.setSpeed(int(speed1_trans), int(speed2_trans))
 
     def rotationMatrixToEulerAngles(self, rotation_mat: np.ndarray):
         eulerAngle = 0.0
         pi = math.pi 
         R21 = rotation_mat[1, 0]
-        R11 = rotation_mat[1, 1]
-        eulerAngle = math.atan2(R21, R11)
+        R22 = rotation_mat[1, 1]
+        eulerAngle = math.atan2(R21, R22)
         # if R11 > 0:
         #     pass 
         # elif R21 >= 0 and R11 < 0:

@@ -100,6 +100,7 @@ class ImageHandle(HandleBase):
                         pass
                 else:
                     self.image_label.mImage = self.mImageFlow.mFrame.copy()
+                self.image_label.update()
         elif self.image_label.mImage:
             self.image_label.mImage = None
 

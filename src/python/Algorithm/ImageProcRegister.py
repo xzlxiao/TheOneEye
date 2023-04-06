@@ -12,7 +12,8 @@ ImageQR2, \
 ImageYoloV3, \
 ImageYoloV3_low_res, \
 ImageSave, \
-Image2Video
+Image2Video, \
+ImageQR_RobotMarker
 
 
 
@@ -21,8 +22,10 @@ class ImageProcRegister:
     def __init__(self) -> None:
         self.mAlgorithmList = [
             ImageProcColorReverse.ImageProcColorReverse(),
-            ImageRotate.ImageRotate(),
+            # ImageRotate.ImageRotate(),
+            ImageQR_RobotMarker.ImageQR_RobotMarker(),
             ImageQR.ImageQR(),
+            ImageQR2.ImageQR2(),
             ImageCornerDetect.ImageCornerDetect(),
             ImageAdaptiveThresholding.ImageAdaptiveThresholding(),
             ImageOtsusBinarization.ImageOtsusBinarization(),
@@ -30,11 +33,11 @@ class ImageProcRegister:
             ImageOpticalFlow.ImageOpticalFlow(),
             ImageKmean8.ImageKmean8(),
             ImageFaceDetect.ImageFaceDetect(),
-            ImageQR2.ImageQR2(),
             ImageYoloV3.ImageYoloV3(),
             ImageYoloV3_low_res.ImageYoloV3_low_res(),
             ImageSave.ImageSave(), 
             Image2Video.Image2Video(),
+            
         ]
 
     def getNames(self):

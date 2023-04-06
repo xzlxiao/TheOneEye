@@ -16,9 +16,13 @@ class ViewFrameBase(QFrame):
     signalAddImageProcView = pyqtSignal()
     signalViewMaxmized = pyqtSignal(QFrame)
     signalViewMinimized = pyqtSignal()
+    signalVisibleChanged = pyqtSignal()
+    __count = 0
     def __init__(self, *arg):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(ViewFrameBase, self).__init__(*arg)
+        self.mId = ViewFrameBase.__count
+        ViewFrameBase.__count += 1
         self.mActiveBorderStyle = 'border:2px solid rgba(200, 50, 50, 255);'
         self.mUnactiveBorderStyle = 'border:2px solid rgba(200, 200, 200, 150);'
         self.deactive()
@@ -29,6 +33,26 @@ class ViewFrameBase(QFrame):
         self.mLayout = QGridLayout(self)
         self.mLayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.mLayout)
+        self.__isVisible_our = True
+
+    def set_visible(self, visible):
+        self.__isVisible_our = visible
+        self.signalVisibleChanged.emit()
+
+    def getVisibleState(self):
+        return self.__isVisible_our
+
+    def getViewType(self):
+        return self.__class__.__name__
+    
+    def getId(self):
+        return self.mId
+    
+    def getDepict(self):
+        '''
+        获取当前视图的文字描述
+        '''
+        return '%s(ID:%d, isVisible:%d)'%(self.getViewType(), self.getId(), self.getVisibleState())
     
     def mouseReleaseEvent(self, a0: QtGui.QMouseEvent):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -117,11 +141,15 @@ class ViewFrameBase(QFrame):
         minimize_view_action.triggered.connect(self.on_minimize_view)
         menu.addAction(minimize_view_action)
 
-        
+        hide_view_action = QAction('隐藏', menu)
+        hide_view_action.triggered.connect(self.on_hide_view)
+        menu.addAction(hide_view_action)
         # menu.addAction(clear_view_action)
         return menu
 
-    
+    def on_hide_view(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.set_visible(False)
 
     def slot_add_image_proc_view(self):
         myDebug(self.__class__.__name__, get_current_function_name())

@@ -33,9 +33,10 @@ import math
 from Common.DebugPrint import myDebug, get_current_function_name
 from Common.XSetting import XSetting
 from Common.Common import XRect
+from Common.WindowSwitcher import WindowSwitcher
 from Views.MainWindow import MainWindow
 from Views.XLabel import XLabel
-from Views import TestCameraWin, ContentsNavWin, MachineVisionWin
+from Views import TestCameraWin, ContentsNavWin, MachineVisionWin, NewControlWin
 from Entity.CameraInterface import CameraInterface
 from Control import MainController
 import sys
@@ -45,16 +46,21 @@ class ViewController(QObject):
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(ViewController, self).__init__(*args)
+        self.mBackMovie = QMovie("resource/images/background001.gif")
         self.mMainWin = MainWindow()
         self.mMainFrame = QFrame(self.mMainWin)
-        self.mCurrentWin = None
+        # self.mCurrentWin = None
         self.mMainLayout = QGridLayout(self.mMainFrame)
         self.mFrameList = []
 
         self.mTestCamera = CameraInterface()
         self.mTestMovieShow = None
+        self.mWinSwitcher = WindowSwitcher()
+        self.mWinSwitcher.setMainLayout(self.mMainLayout)
         self.windowLoad()
 
+    def getCurrentWin(self):
+        return self.mWinSwitcher.getCurrentWin()
 
 # 方法
     def windowLoad(self):
@@ -67,6 +73,7 @@ class ViewController(QObject):
 
         self.windowsInstall(ContentsNavWin.ContentsNavWin)
         self.windowsInstall(MachineVisionWin.MachineVisionWin)
+        self.windowsInstall(NewControlWin.NewControlWin)
 
         ### 摄像头测试 begin
         test_camera_win = self.windowsInstall(TestCameraWin.TestCameraWin)
@@ -98,33 +105,40 @@ class ViewController(QObject):
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mMainWin.show()
-        movie = QMovie("resource/images/background001.gif")
         for label_i in self.mMainWin.mlbBackgroundList:
-            label_i.setMovie(movie)
+            label_i.setMovie(self.mBackMovie)
             label_i.setScaledContents(True)
-        movie.start()
+
+    def startBackMovie(self):
+        for label_i in self.mMainWin.mlbBackgroundList:
+            label_i.show()
+        self.mBackMovie.start()
+    
+    def stopBackMovie(self):
+        for label_i in self.mMainWin.mlbBackgroundList:
+            label_i.hide()
+        self.mBackMovie.stop()
 
     def navigateTo(self, win_name: str):
         myDebug(self.__class__.__name__, get_current_function_name())
         isFind = False
         for iter in self.mFrameList:
             if win_name.strip() == iter.name:
+                print(win_name)
                 self.windowSwitch(iter)
                 isFind = True
 
         if not isFind:
             raise Exception("Fail to switch window. The name of win isn't exited, please checking.")
 
-    def windowSwitch(self, win: QWidget):
+    def windowSwitch(self, win: WinBase):
         myDebug(self.__class__.__name__, get_current_function_name())
-        self.mCurrentWin: QFrame
-        if self.mCurrentWin is not None:
-            self.mMainLayout.replaceWidget(self.mCurrentWin, win)
-            self.mCurrentWin.hide()
+        if win.isStartBackMovie:
+            self.startBackMovie()
         else:
-            self.mMainLayout.addWidget(win)
-        self.mCurrentWin = win
-        self.mCurrentWin.show()
+            self.stopBackMovie()
+        self.mWinSwitcher.switchTo(win)
+
 
     def getShowRect(self, src_image: np.ndarray, width_crop: int, height_crop: int) -> XRect:
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -157,8 +171,9 @@ class ViewController(QObject):
         if watched is self.mMainWin:
             if event.type() == QResizeEvent.Resize:
                 self.mMainFrame.resize(self.mMainWin.mCentralWidget.width(), self.mMainWin.mCentralWidget.height())
-                if self.mCurrentWin is not None:
-                    self.mCurrentWin.setReturnButtonLoc()
+                current_win = self.getCurrentWin()
+                if current_win is not None:
+                    current_win.setReturnButtonLoc()
                 isEventGot = True
         # elif watched is self.mFrameList[1].mFrameViewArea:
         #     if event.type() == QContextMenuEvent.MouseButtonRelease:

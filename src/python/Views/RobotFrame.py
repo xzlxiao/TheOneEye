@@ -26,6 +26,15 @@ class RobotFrame(ImageProcViewBase):
         # self.insertOptionList('------Policy------', self.defaultFunc)
         # self.insertOptionList('添加机器人Policy模块', self.addRobotPolicyFunc)
 
+    def getDepict(self):
+        '''
+        获取当前视图的文字描述
+        '''
+        if self.mRobot is None:
+            return '%s(ID:%d, isVisible:%d)'%(self.getViewType(), self.getId(), self.getVisibleState())
+        else:
+            return '%s(ID:%d, isVisible:%d, RobotID: %d, IP: %s)'%(self.getViewType(), self.getId(), self.getVisibleState(), self.mRobot.mId, self.mRobot.client_addr)
+
     def setRobot(self, robot):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mRobot = robot
@@ -39,6 +48,7 @@ class RobotFrame(ImageProcViewBase):
         self.insertOptionList('添加图像处理模块', self.addImageProcFunc)
         self.insertOptionList('------Policy------', self.defaultFunc)
         self.insertOptionList('添加机器人Policy模块', self.addRobotPolicyFunc)
+        self.signalVisibleChanged.emit()
 
     def addRobotPolicyFunc(self, ind: int):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -89,11 +99,26 @@ class RobotFrame(ImageProcViewBase):
         policy_control_action.triggered.connect(partial(self.setRobotState, RobotControlMode.PolicyControl))
         control_list.addAction(policy_control_action)
         menu.addMenu(control_list)
+        data_set_list = QMenu(menu)
+        data_set_list.setTitle('数据流开关')
+        data_stream_start = QAction('开启机器人返回的数据流', data_set_list)
+        data_stream_start.triggered.connect(self.slot_robot_data_stream_start)
+        data_set_list.addAction(data_stream_start)
+        data_stream_stop = QAction('关闭机器人返回的数据流', data_set_list)
+        data_stream_stop.triggered.connect(self.slot_robot_data_stream_stop)
+        data_set_list.addAction(data_stream_stop)
+        menu.addMenu(data_set_list)
         menu.exec_(event.globalPos())
 
     def setRobotState(self, state: RobotControlMode):
         self.mRobot.mState = state
     
+    def slot_robot_data_stream_start(self):
+        self.mRobot.isDataStreamOn = True 
+
+    def slot_robot_data_stream_stop(self):
+        self.mRobot.isDataStreamOn = False
+
     def slot_set_robot_id(self):
         self.parent().releaseKeyboard()
         dialog = QInputDialog(self)
@@ -138,3 +163,8 @@ class RobotFrame(ImageProcViewBase):
             elif key_event.key() == Qt.Key_Space:
                 self.mRobot.setSpeed(0, 0)
                 print('Key_Space')
+            elif key_event.key() == Qt.Key_P:
+                pass 
+            elif key_event.key() == Qt.Key_Escape:
+                self.parent().releaseKeyboard()
+                print('Key_Escape')

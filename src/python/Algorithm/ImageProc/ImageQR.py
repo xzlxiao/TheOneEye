@@ -1,33 +1,34 @@
 from Algorithm.ImageProc.ImageProcBase import ImageProcBase
+from Common.XSetting import XSetting
 import cv2
 import numpy as np
 from Control import MainController
 import math
 
+'''
+def qrDectbyZbar(frame):
+    h1, w1 = frame.shape[0], frame.shape[1]
 
-# def qrDectbyZbar(frame):
-#     h1, w1 = frame.shape[0], frame.shape[1]
+    texts = pyzbar.decode(frame)
+    for text in texts:
+        textdate = text.data.decode('utf-8')
+        (x, y, w, h) = text.rect  # 获取二维码的外接矩形顶点坐标
 
-#     texts = pyzbar.decode(frame)
-#     for text in texts:
-#         textdate = text.data.decode('utf-8')
-#         (x, y, w, h) = text.rect  # 获取二维码的外接矩形顶点坐标
-
-#         # 二维码中心坐标
-#         cx = int(x + w / 2)
-#         cy = int(y + h / 2)
-#         cv2.circle(frame, (cx, cy), 2, (0, 255, 0), 8)  # 做出中心坐标
-#         # 画出画面中心与二维码中心的连接线
-#         cv2.line(frame, (cx, cy), (int(w1 / 2), int(h1 / 2)), (255, 0, 0), 10)
-#         # 二维码最小矩形
-#         try:
-#             cv2.line(frame, text.polygon[0], text.polygon[1], (255, 0, 0), 2)
-#             cv2.line(frame, text.polygon[1], text.polygon[2], (255, 0, 0), 2)
-#             cv2.line(frame, text.polygon[2], text.polygon[3], (255, 0, 0), 2)
-#             cv2.line(frame, text.polygon[3], text.polygon[0], (255, 0, 0), 2)
-#         except IndexError:
-#             pass
-
+        # 二维码中心坐标
+        cx = int(x + w / 2)
+        cy = int(y + h / 2)
+        cv2.circle(frame, (cx, cy), 2, (0, 255, 0), 8)  # 做出中心坐标
+        # 画出画面中心与二维码中心的连接线
+        cv2.line(frame, (cx, cy), (int(w1 / 2), int(h1 / 2)), (255, 0, 0), 10)
+        # 二维码最小矩形
+        try:
+            cv2.line(frame, text.polygon[0], text.polygon[1], (255, 0, 0), 2)
+            cv2.line(frame, text.polygon[1], text.polygon[2], (255, 0, 0), 2)
+            cv2.line(frame, text.polygon[2], text.polygon[3], (255, 0, 0), 2)
+            cv2.line(frame, text.polygon[3], text.polygon[0], (255, 0, 0), 2)
+        except IndexError:
+            pass
+'''
 
 # mindvision camera, tested in 1920x1200
 newcameramtx = np.array(
@@ -43,20 +44,23 @@ mtx = np.array(
  [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
 
 
-def qrDextbyArUco(frame, transM, mapw, maph):
+def qrDextbyArUco(frame, transM, mapw, maph, env_width, env_height):
+    
     w = frame.shape[1]
     h = frame.shape[0]
     frame = cv2.warpPerspective(frame, transM, (w, h))
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_1000)
     parameters = cv2.aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
     angular = []
     centers = []
+
     if ids is not None:
         rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.05, mtx, dist)
         (rvec - tvec).any()
         for i in range(rvec.shape[0]):
+            
             cv2.aruco.drawAxis(frame, mtx, dist, rvec[i, :, :], tvec[i, :, :], 0.03)
             cv2.aruco.drawDetectedMarkers(frame, corners)
 
@@ -73,22 +77,20 @@ def qrDextbyArUco(frame, transM, mapw, maph):
                 # x = math.atan2(-R[1, 2], R[1, 1])
                 # y = math.atan2(-R[2, 0], sy)
                 z = 0
-            # 偏航，俯仰，滚动换成角度
-            # rx = x * 180.0 / 3.141592653589793
-            # ry = y * 180.0 / 3.141592653589793
-            rz = z * 180.0 / 3.141592653589793
-            # distance = ((tvec[i][0][2] + 0.02) * 0.0254) * 100  # 单位是米
+            rz = -z
             angular.append([0, 0, rz])
+
+        # print(angular)
 
         cornerarr = [i[0] for i in corners]
         centers = [np.sum(cornerarr[i], axis=0) / 4 for i in range(len(ids))]
-        centers = [[center[0] * mapw / w, center[1] * maph / h, 0] for center in centers]
+        centers = [[(center[0] / mapw - 0.5) * env_width, (0.5-(center[1] / maph))*env_height, 0] for center in centers]
     return frame, ids, centers, angular
 
 
 def initMap(frame, ratio):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_1000)
     parameters = cv2.aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
     if ids is None:
@@ -112,20 +114,20 @@ def initMap(frame, ratio):
                 if center[1] < piccenter[1]:  # left top
                     for j in range(4):
                         if cornerssquar[i][j][0] < center[0] and cornerssquar[i][j][1] < center[1]:
-                            mapbftrans[i] = cornerssquar[i][j]
+                            mapbftrans[0] = cornerssquar[i][j]
                 else:  # left button
                     for j in range(4):
                         if cornerssquar[i][j][0] < center[0] and cornerssquar[i][j][1] > center[1]:
-                            mapbftrans[i] = cornerssquar[i][j]
+                            mapbftrans[3] = cornerssquar[i][j]
             else:
                 if center[1] < piccenter[1]:  # right top
                     for j in range(4):
                         if cornerssquar[i][j][0] >= center[0] and cornerssquar[i][j][1] < center[1]:
-                            mapbftrans[i] = cornerssquar[i][j]
+                            mapbftrans[1] = cornerssquar[i][j]
                 else:  # right button
                     for j in range(4):
                         if cornerssquar[i][j][0] >= center[0] and cornerssquar[i][j][1] >= center[1]:
-                            mapbftrans[i] = cornerssquar[i][j]
+                            mapbftrans[2] = cornerssquar[i][j]
             i = i + 1
 
         mapaftrans = np.array([[0, 0], [w, 0], [w, int(w * ratio)], [0, int(w * ratio)]], dtype='float32')
@@ -133,11 +135,13 @@ def initMap(frame, ratio):
         transM = cv2.getPerspectiveTransform(mapbftrans, mapaftrans)
 
         print('init completed\n')
-        print('before={}\n'.format(mapbftrans))
-        print('after={}\n'.format(mapaftrans))
-        print('trans={}\n'.format(transM))
+        # print('before={}\n'.format(mapbftrans))
+        # print('after={}\n'.format(mapaftrans))
+        # print('trans={}\n'.format(transM))
         return mapbftrans, mapaftrans, transM
 
+env_width = float(XSetting.getValue('Epuck/ENVSIZE_WIDTH'))
+env_height = float(XSetting.getValue('Epuck/ENVSIZE_HEIGHT'))
 
 class ImageQR(ImageProcBase):
     def __init__(self) -> None:
@@ -146,8 +150,8 @@ class ImageQR(ImageProcBase):
         self.mapInited = 0
         self.zbardetect = 0
         self.arucodetect = 1
-        self.mapheight = 1080
-        self.mapwidth = 1980
+        self.mapheight = 1200  # MindVision的相机的分辨率就是1920x1200，不是1920x1080
+        self.mapwidth = 1920
         self.mapBfTrans = []
         self.mapAfTrans = []
         self.transM = None
@@ -169,7 +173,6 @@ class ImageQR(ImageProcBase):
             image_tmp = 255 - image_tmp
             '''
             image_tmp = image_tmp.astype(np.uint8)
-            frame = None 
             if not self.mapInited:
                 ret = initMap(image_tmp, ratio=(self.mapheight/self.mapwidth))
                 if ret:
@@ -180,20 +183,15 @@ class ImageQR(ImageProcBase):
             else:
                 if self.arucodetect:
                     # 单个二维码测试耗时< 10 ms
-                    frame, self.carIds, self.posiCar, self.poseCar = qrDextbyArUco(image_tmp, self.transM,
-                                                                                   self.mapwidth, self.mapheight)
-            if frame is not None:
-                image[:, :, 0:3] = frame[:, :, :]
-            else:
-                image[:, :, 0:3] = image_tmp[:, :, :]
+                    image_tmp, self.carIds, self.posiCar, self.poseCar = qrDextbyArUco(image_tmp, self.transM, self.mapwidth, self.mapheight, env_width, env_height)
+            image[:, :, 0:3] = image_tmp[:, :, :]
             ret = image
-            controller = MainController.getController()
-            
-            if self.carIds:
+
+            controller = MainController.getController()  # upload data to up-layer(shang ceng)
+            if self.carIds is not None:
                 for i in range(len(self.carIds)):
                     controller.mCameraData.setData('GlobalLocation', self.carIds[i][0],
                                                 np.concatenate((self.posiCar[i], self.poseCar[i])))
-            # print(controller.mCameraData.data)
         else:
             raise Exception('图像类型不支持')
         return ret

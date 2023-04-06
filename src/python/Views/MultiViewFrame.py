@@ -16,14 +16,24 @@ from Views.CellphoneFrame import CellphoneFrame
 from Views.ImageProcViewFrame import ImageProcViewFrame
 from Views.ViewFrameBase import ViewFrameBase
 from Views.RobotFrame import RobotFrame
+from Views.RobotFrameTest import RobotFrameTest
 from Views.MultiRobotControlFrame import MultiRobotControlFrame
 from Control.CameraController import XCameraType
 import copy
 
+from enum import Enum
+
 from Entity.RobotCellphone import RobotCellphone
+
+class ViewShowState(Enum):
+    viewMaximized = 0
+    viewMinimized = 1
+    viewEncircled = 2
 
 class MultiViewFrame(QFrame):
     signalViewFocusChanged = pyqtSignal()
+    signalViewShowStateChanged = pyqtSignal(ViewShowState)
+    signalViewListChanged = pyqtSignal()
     def __init__(self, *args):
         myDebug(self.__class__.__name__, get_current_function_name())
         super(MultiViewFrame, self).__init__(*args)
@@ -41,10 +51,13 @@ class MultiViewFrame(QFrame):
         self.mBackgound.show()
 
         self.mFocusedView = None
-        self.mLastViewList = []
+        # self.mLastVisibleViewList = []
         self.mViewList = []
         self.isViewMaximizedStateChanged = False
         self.mMaximizedView = None
+
+    def getVisibleViewList(self):
+        return [view for ind, view in enumerate(self.mViewList) if view.getVisibleState() if ind < 36]
 
     def mkQMenu(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -91,6 +104,10 @@ class MultiViewFrame(QFrame):
         add_VPuck_action.triggered.connect(self.slot_add_VPuck)
         menu.addAction(add_VPuck_action)
 
+        add_EPuck_test_action = QAction('添加EPuck测试', menu)
+        add_EPuck_test_action.triggered.connect(self.slot_add_EPuck_test)
+        menu.addAction(add_EPuck_test_action)
+
         clear_views_action = QAction('清空视图', menu)
         clear_views_action.triggered.connect(self.slot_clearSubview)
         menu.addAction(clear_views_action)
@@ -104,7 +121,9 @@ class MultiViewFrame(QFrame):
         menu=self.mkQMenu()
         menu.exec_(event.globalPos())
 
-
+    def getViewNameList(self):
+        return [view.getDepict() for view in self.mViewList]
+    
     def slot_add_cellphone_proc_view(self):
         dialog = QInputDialog(self)
         dialog.setModal(True)
@@ -219,6 +238,14 @@ class MultiViewFrame(QFrame):
             print("dialog canceled")
         dialog.show()
 
+    def slot_add_EPuck_test(self):
+        robot_controller = MainController.getController().mRobotController
+        robot_controller.addRobot(RobotEpuck)
+        robot = robot_controller.getRobot(-1)
+        view = RobotFrameTest(self)
+        view.setRobot(robot)
+        self.addSubview(view)
+
     def slot_add_image_proc_view(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         view = ImageProcViewFrame(self)
@@ -263,43 +290,44 @@ class MultiViewFrame(QFrame):
         """
         根据子图数量对子图进行排布
         """
-        if len(self.mViewList) == 1:
-            for widget in self.mLastViewList:
-                self.removeView(widget)
+        view_list_visible = self.getVisibleViewList()
+        if len(view_list_visible) == 1:
             for widget in self.mViewList:
-                self.addView(widget, 0, 0)
-        elif len(self.mViewList) <= 4:
-            for widget in self.mLastViewList:
                 self.removeView(widget)
-            for ind, widget in enumerate(self.mViewList):
+            for widget in view_list_visible:
+                self.addView(widget, 0, 0)
+        elif len(view_list_visible) <= 4:
+            for widget in self.mViewList:
+                self.removeView(widget)
+            for ind, widget in enumerate(view_list_visible):
                 row = ind // 2
                 col = ind % 2
                 self.addView(widget, row, col)
-        elif len(self.mViewList) <= 9:
-            for widget in self.mLastViewList:
+        elif len(view_list_visible) <= 9:
+            for widget in self.mViewList:
                 self.removeView(widget)
-            for ind, widget in enumerate(self.mViewList):
+            for ind, widget in enumerate(view_list_visible):
                 row = ind // 3
                 col = ind % 3
                 self.addView(widget, row, col)
-        elif len(self.mViewList) <= 16:
-            for widget in self.mLastViewList:
+        elif len(view_list_visible) <= 16:
+            for widget in self.mViewList:
                 self.removeView(widget)
-            for ind, widget in enumerate(self.mViewList):
+            for ind, widget in enumerate(view_list_visible):
                 row = ind // 4
                 col = ind % 4
                 self.addView(widget, row, col)
-        elif len(self.mViewList) <= 25:
-            for widget in self.mLastViewList:
+        elif len(view_list_visible) <= 25:
+            for widget in self.mViewList:
                 self.removeView(widget)
-            for ind, widget in enumerate(self.mViewList):
+            for ind, widget in enumerate(view_list_visible):
                 row = ind // 5
                 col = ind % 5
                 self.addView(widget, row, col)
-        elif len(self.mViewList) <= 36:
-            for widget in self.mLastViewList:
+        elif len(view_list_visible) <= 36:
+            for widget in self.mViewList:
                 self.removeView(widget)
-            for ind, widget in enumerate(self.mViewList):
+            for ind, widget in enumerate(view_list_visible):
                 row = ind // 6
                 col = ind % 6
                 self.addView(widget, row, col)
@@ -314,12 +342,12 @@ class MultiViewFrame(QFrame):
             if self.mMaximizedView is None:
                 self._multiLayout()
             else:
-                for widget in self.mLastViewList:
+                for widget in self.mViewList:
                     self.removeView(widget)
                 self.addView(self.mMaximizedView, 0, 0)
         else:
             if self.mMaximizedView is None:
-                self.mLastViewList = self.mViewList.copy()
+                # self.mLastVisibleViewList = self.mViewList.copy()
                 self._multiLayout()
             else:
                 self.removeView(self.mMaximizedView)
@@ -328,43 +356,71 @@ class MultiViewFrame(QFrame):
 
     def addSubview(self, view:ViewFrameBase):
         myDebug(self.__class__.__name__, get_current_function_name())
-        if len(self.mViewList) < 36:
-            self.mLastViewList = self.mViewList.copy()
-            self.mViewList.append(view)
-            view.signalDestroyed.connect(self.on_removeSubview)
-            view.signalFocusedChanged.connect(self.slot_subview_active_changed)
-            view.signalClearViews.connect(self.slot_clearSubview)
-            view.signalAddImageProcView.connect(self.slot_add_image_proc_view)
-            view.signalViewMaxmized.connect(self.slotMaximizeView)
-            view.signalViewMinimized.connect(self.slotMinimizeView)
-            self.reLayoutView()
-            
-    def slotMaximizeView(self, view:ViewFrameBase):
+        # self.mLastVisibleViewList = self.mViewList.copy()
+        self.mViewList.append(view)
+        view.signalDestroyed.connect(self.on_removeSubview)
+        view.signalFocusedChanged.connect(self.slot_subview_active_changed)
+        view.signalClearViews.connect(self.slot_clearSubview)
+        view.signalAddImageProcView.connect(self.slot_add_image_proc_view)
+        view.signalViewMaxmized.connect(self.slotMaximizeView)
+        view.signalViewMinimized.connect(self.slotMinimizeView)
+        view.signalVisibleChanged.connect(self.slot_subview_visible_changed)
+        self.signalViewListChanged.emit()
+        self.reLayoutView()
+
+    def maximizeView(self, view:ViewFrameBase):
+        myDebug(self.__class__.__name__, get_current_function_name())
         if self.mMaximizedView is None:
             self.isViewMaximizedStateChanged = True
-            self.mLastViewList = self.mViewList.copy()
+            # self.mLastVisibleViewList = self.mViewList.copy()
         else:
-            self.mLastViewList = []
-            self.mLastViewList.append(self.mMaximizedView)
+            self.isViewMaximizedStateChanged = False
+            # self.mLastVisibleViewList = []
+            # self.mLastVisibleViewList.append(self.mMaximizedView)
         self.setFocusedView(view)
         self.mMaximizedView = view
         self.reLayoutView()
-        self.isViewMaximizedStateChanged = False
+        
 
-    def slotMinimizeView(self):
+    def minimizeView(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
         if self.mMaximizedView is not None:
             self.isViewMaximizedStateChanged = True
-            self.mLastViewList = []
-            self.mLastViewList.append(self.mMaximizedView)
+            # self.mLastVisibleViewList = []
+            # self.mLastVisibleViewList.append(self.mMaximizedView)
+        else:
+            self.isViewMaximizedStateChanged = False
         self.mMaximizedView = None
         self.reLayoutView()
-        self.isViewMaximizedStateChanged = False
+        
+
+    def encircleView(self, view:ViewFrameBase):
+        """环绕显示，待实现
+        """        
+        myDebug(self.__class__.__name__, get_current_function_name())
+        pass
+
+    def slotMaximizeView(self, view:ViewFrameBase):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.maximizeView(view)
+        self.signalViewShowStateChanged.emit(ViewShowState.viewMaximized)
+
+    def slotMinimizeView(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.minimizeView()
+        self.signalViewShowStateChanged.emit(ViewShowState.viewMinimized)
+
+    def slotEncircleView(self, view:ViewFrameBase):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.encircleView(view)
+        self.signalViewShowStateChanged.emit(ViewShowState.viewEncircled)
 
     def on_removeSubview(self, view):
         myDebug(self.__class__.__name__, get_current_function_name())
         if view.isFocused:
             self.setFocusedView(None)
-        self.mLastViewList = self.mViewList.copy()
+        # visible_view_list = self.mViewList
+        # self.mLastVisibleViewList = visible_view_list.copy()
         view_ind = self.mViewList.index(view)
         input_flow = self.mViewList[view_ind].getInputFlow()
         camera_controller = MainController.getController().mCameraController
@@ -376,6 +432,11 @@ class MultiViewFrame(QFrame):
         self.mViewList.pop(self.mViewList.index(view))
         self.reLayoutView()
 
+    def slot_subview_visible_changed(self):
+        self.slotMinimizeView()
+        self.signalViewListChanged.emit()
+        # self.reLayoutView()
+
     def slot_subview_active_changed(self, view: ViewFrameBase, value: bool):
         myDebug(self.__class__.__name__, get_current_function_name())
         if self.mFocusedView:
@@ -385,18 +446,21 @@ class MultiViewFrame(QFrame):
             # self.mFocusedView.active()
         else: 
             view.deactive()
+        self.signalViewListChanged.emit()
 
 
     def slot_clearSubview(self):
         myDebug(self.__class__.__name__, get_current_function_name())
-        self.mLastViewList = self.mViewList.copy()
-        self.mViewList = []
-        self.reLayoutView()
+        # self.mLastViewList = self.mViewList.copy()
+        # self.mViewList = []
+        # self.reLayoutView()
         camera_controller = MainController.getController().mCameraController
-        for i in self.mLastViewList:
+        for i in self.mViewList:
             i.destroy()
+        self.mViewList = []
         camera_controller.releaseAllCamera()
         self.setFocusedView(None)
+        self.reLayoutView()
 
     def setFocusedView(self, view):
         myDebug(self.__class__.__name__, get_current_function_name())

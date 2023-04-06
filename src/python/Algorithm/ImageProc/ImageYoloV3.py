@@ -106,7 +106,7 @@ class ImageYoloV3(ImageProcBase):
             image_tmp = 255 - image_tmp
             '''
             # controller = MainController.getController()
-            if ImageYoloV3.mModelYolo is not None:
+            if ImageYoloV3.modelYolo is not None:
                 image_tmp = detect(image_tmp)
             else:
                 print('Yolo model is not loaded')

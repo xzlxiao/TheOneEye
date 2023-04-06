@@ -48,6 +48,7 @@ class WinBase(QtWidgets.QWidget):
         self.mReturnButton.setMaximumWidth(100)
         self.mReturnButton.setText(r"Return")
         self.mReturnButton.clicked.connect(self.on_ReturnButton)
+        self.isStartBackMovie = True
 
     def windowLoad(self):
         pass

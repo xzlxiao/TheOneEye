@@ -11,9 +11,9 @@ class RobotPolicyTest(RobotPolicyBase.RobotPolicyBase):
         self.isFirstRun = True
 
     def inputSetTarget(self):
-        from Control.MainController import getController
-        controller = getController()
-        controller.mViewController.mCurrentWin.mFrameViewArea.releaseKeyboard()
+        from Control import MainController
+        controller = MainController.getController()
+        controller.mViewController.getCurrentWin().mFrameViewArea.releaseKeyboard()
         # dialog = QInputDialog(controller.mViewController.mCurrentWin)
         # dialog.setModal(True)
         # dialog.setStyleSheet("""
@@ -25,17 +25,21 @@ class RobotPolicyTest(RobotPolicyBase.RobotPolicyBase):
         # dialog.setInputMode(QInputDialog.TextInput)
         # dialog.textValueSelected.connect(lambda text_: print(text_))
         # dialog.show()
-        result = QInputDialog.getText(controller.mViewController.mCurrentWin,'Get Target Position','Target examp: 0.940, 0.425, 0, 0, 0, -30')
+        result = QInputDialog.getText(controller.mViewController.getCurrentWin(),'Get Target Position','Target examp: 0.940, 0.425, 0, 0, 0, -30')
         if self.mRobot:
             target = result[0].split(',')
             self.mRobot.setTarget([float(i.strip()) for i in target])
             # print(self.mRobot.mTarget)
-        controller.mViewController.mCurrentWin.mFrameViewArea.grabKeyboard()
+        controller.mViewController.getCurrentWin().mFrameViewArea.grabKeyboard()
 
     def update(self):
+        from Control import MainController
+        controller = MainController.getController()
         # print('test RobotPolicyTest')
         if self.isFirstRun:
             self.inputSetTarget()
             self.isFirstRun = False
         self.mRobot.feedbackControl()
+        controller.mCameraData.setData('FeedbackControl_target', self.mRobot.mId, self.mRobot.mTarget)
+
 

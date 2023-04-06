@@ -76,7 +76,7 @@ class MachineVisionWin(WinBase.WinBase):
     def mkConnect(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.mReturnButton.clicked.connect(self.slot_return)
-        self.mFrameViewArea.signalViewFocusChanged.connect(self.slot_view_focaus_changed)
+        self.mFrameViewArea.signalViewFocusChanged.connect(self.slot_view_focus_changed)
         self.listViewOption.clicked.connect(self.on_clicked_list)
 
     def showEvent(self, event):
@@ -87,7 +87,7 @@ class MachineVisionWin(WinBase.WinBase):
     def hideEvent(self, event):
         pass
 
-    def slot_view_focaus_changed(self):
+    def slot_view_focus_changed(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         if self.mFrameViewArea.mFocusedView:
             self.mSlm.setStringList(self.mFrameViewArea.mFocusedView.mOptionList)

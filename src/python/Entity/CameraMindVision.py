@@ -100,6 +100,7 @@ class CameraMindVision(CameraBase):
             frame = frame.reshape(FrameHead.iHeight, FrameHead.iWidth, 3)
             self.mFrame = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
             self.mViewCamera.mImage = self.mFrame
+            self.mViewCamera.update()
         except mvsdk.CameraException as e:
             if e.error_code != mvsdk.CAMERA_STATUS_TIME_OUT:
                 print("CameraGetImageBuffer failed({}): {}".format(e.error_code, e.message) )

@@ -26,7 +26,7 @@ def qrDextbyArUco2(frame):
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100)
-    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_1000)
     parameters = cv2.aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
     angular = []
@@ -34,29 +34,10 @@ def qrDextbyArUco2(frame):
     if ids is not None:
         rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.05, mtx, dist)
         (rvec - tvec).any()
+        print(rvec.shape)
         for i in range(rvec.shape[0]):
             cv2.aruco.drawAxis(frame, mtx, dist, rvec[i, :, :], tvec[i, :, :], 0.03)
             cv2.aruco.drawDetectedMarkers(frame, corners)
-
-            # # https://blog.csdn.net/dgut_guangdian/article/details/108093643
-            # R = np.zeros((3, 3), dtype=np.float64)
-            # cv2.Rodrigues(rvec[i, :, :], R)
-            # sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
-            # singular = sy < 1e-6
-            # if not singular:  # 偏航，俯仰，滚动
-            #     # x = math.atan2(R[2, 1], R[2, 2])
-            #     # y = math.atan2(-R[2, 0], sy)
-            #     z = math.atan2(R[1, 0], R[0, 0])
-            # else:
-            #     # x = math.atan2(-R[1, 2], R[1, 1])
-            #     # y = math.atan2(-R[2, 0], sy)
-            #     z = 0
-            # # 偏航，俯仰，滚动换成角度
-            # # rx = x * 180.0 / 3.141592653589793
-            # # ry = y * 180.0 / 3.141592653589793
-            # rz = z * 180.0 / 3.141592653589793
-            # # distance = ((tvec[i][0][2] + 0.02) * 0.0254) * 100  # 单位是米
-            # angular.append([0, 0, rz])
 
         cornerarr = [i[0] for i in corners]
         centers = [np.sum(cornerarr[i], axis=0) / 4 for i in range(len(ids))]

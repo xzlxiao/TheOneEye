@@ -1,4 +1,4 @@
-from Algorithm.RobotPolicy import RobotPolicyBase, RobotPolicyTest
+from Algorithm.RobotPolicy import RobotPolicyBase, RobotPolicyTest, RobotPolicyPos, RobotPolicyQR_pos
 
 
 class RobotPolicyRegister:
@@ -6,6 +6,8 @@ class RobotPolicyRegister:
     def __init__(self) -> None:
         self.mAlgorithmList = [
             RobotPolicyTest.RobotPolicyTest(),
+            RobotPolicyPos.RobotPolicyPos(),
+            RobotPolicyQR_pos.RobotPolicyQR_pos(),
         ]
 
     def getNames(self):

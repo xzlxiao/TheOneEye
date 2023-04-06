@@ -36,9 +36,10 @@ sys.path.append("../")
 __controller = None
 
 class MainController(QtCore.QObject):
+    # __controller = None 
     def __init__(self, *arg):
         myDebug(self.__class__.__name__, get_current_function_name())
-        super(MainController, self).__init__(*arg)
+        super(MainController, self).__init__(*arg)        
         self.mMainLoopTimer = QtCore.QTimer(self)
         self.mViewController = ViewController.ViewController()
         self.mCameraController = CameraController.CameraController()
@@ -48,6 +49,13 @@ class MainController(QtCore.QObject):
         self.mDataHandle = []
         self.initConnect()
         self.t1 = 0.0
+        
+
+    def getInstance():
+        # if MainController.__controller is None:
+        #     MainController.__controller = MainController()
+        # return MainController.__controller
+        return __controller
 
     def start(self):
         myDebug(self.__class__.__name__, get_current_function_name())

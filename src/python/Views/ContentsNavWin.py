@@ -64,6 +64,7 @@ class ContentsNavWin(WinBase.WinBase):
         self.btnToTestForm: QPushButton
         self.btnToTestForm.clicked.connect(self.on_btnToTestForm)
         self.btnToMVForm.clicked.connect(self.on_btnToMVForm)
+        self.btnToNewControlForm.clicked.connect(self.on_btnToNewControlForm)
 
     def on_btnToTestForm(self):
         myDebug(self.__class__.__name__, get_current_function_name())
@@ -72,6 +73,10 @@ class ContentsNavWin(WinBase.WinBase):
     def on_btnToMVForm(self):
         myDebug(self.__class__.__name__, get_current_function_name())
         self.signalChangeWin.emit('MachineVisionWin')
+
+    def on_btnToNewControlForm(self):
+        myDebug(self.__class__.__name__, get_current_function_name())
+        self.signalChangeWin.emit('NewControlWin')
 
     def resizeEvent(self, e: QResizeEvent):
         super().resizeEvent(e)

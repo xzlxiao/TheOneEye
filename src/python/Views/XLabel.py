@@ -59,6 +59,8 @@ class XLabel(QLabel):
             painter = QPainter(self)
             painter.save()
             painter.setRenderHint(QPainter.Antialiasing, True)
-            image_height = (self.width()-4)*self.mBackImage.height()/self.mBackImage.width()
+            image_height = 0
+            if self.mBackImage.width():
+                image_height = (self.width()-4)*self.mBackImage.height()/self.mBackImage.width()
             painter.drawPixmap(2, self.height()/2-image_height/2, self.width()-4, image_height, self.mBackImage)
             painter.restore()
