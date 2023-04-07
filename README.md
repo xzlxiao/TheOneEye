@@ -4,7 +4,13 @@ It's designed for machine vision testing tasks.
 
 ![](resource/file_res/TOE.gif)
 
+And the new function is for swarm robots control, such as epuck2.
+
 ![](resource/images/robot_detect.png)
+
+This is the epuck2(wifi mode) pos control demo.
+
+https://user-images.githubusercontent.com/13963194/230578263-dea79f5c-917d-44e3-88e9-8064465d289e.mp4
 
 ## evironment setup
 - sudo apt install libqt5multimedia5-plugins
